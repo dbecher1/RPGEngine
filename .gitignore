@@ -1,0 +1,5 @@
+.*
+!.gitignore
+cmake-build-debug
+cmake-build-release
+resources/images

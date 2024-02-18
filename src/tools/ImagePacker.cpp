@@ -1,0 +1,142 @@
+//
+// Created by Daniel Becher on 2/7/24.
+//
+
+#include "ImagePacker.h"
+
+#define DEBUG_SAVE_IMAGE true
+
+#include <iostream>
+#include <filesystem>
+#include <vector>
+
+bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceManager, const std::string& path) {
+    // TODO: add error checking
+
+    std::vector<ImageData> images;
+
+    for (const auto &file : std::filesystem::recursive_directory_iterator(path)) {
+        if (file.is_regular_file()) {
+            SDL_Surface* temp = IMG_Load(file.path().c_str());
+
+            if (temp == nullptr) continue;
+
+            std::string fName = file.path().filename().string();
+
+            if (!INCLUDE_EXTENSION) {
+                fName = fName.substr(0, fName.find('.'));
+            }
+
+            images.push_back({temp, fName, temp->w, temp->h});
+
+            if (DEBUG_PRINT) {
+                std::cout << "Loaded image " << file.path().filename();
+                std::cout << "\nWidth: " << temp->w;
+                std::cout << "\nHeight: " << temp->h << '\n' << std::endl;
+            }
+        }
+    }
+    sortImageData(&images);
+
+    // Packing sequence begins here after images are sorted
+
+    int x = 0, y = 0, max_height = 0, final_height = 0, boundary = 512;
+    const int border = 0; // if we want a space in between images, opting for 0
+    bool success;
+    do {
+        success = true;
+        for (const auto& img : images) {
+            // test the width against the boundary
+            if (x + img.width > boundary) {
+                if (max_height == 0)
+                    max_height = img.height;
+                // reset to move to next line
+                y += max_height + border;
+                x = 0;
+                max_height = 0;
+            }
+            if (y + img.height > boundary) {
+                success = false;
+                if (DEBUG_PRINT) {
+                    std::cout << "Boundary size " << boundary;
+                    std::cout << " too small, growing boundary and trying again." << std::endl;
+                }
+                boundary = static_cast<int>(boundary * 1.5);
+                resourceManager->textureRects.clear();
+                x = 0;
+                y = 0;
+                break;
+            }
+            SDL_Rect rect {x, y, img.width, img.height};
+            resourceManager->textureRects.emplace(img.fileName, rect);
+
+            x += img.width + border;
+
+            if (img.height > max_height) {
+                max_height = img.height;
+                final_height = y + max_height + border;
+            }
+        }
+    } while (!success);
+
+    SDL_Surface* final_surf = SDL_CreateRGBSurfaceWithFormat(0, boundary, final_height, 32, SDL_PIXELFORMAT_ABGR8888);
+
+    for (const auto& i : images) {
+        SDL_BlitSurface(i.data, nullptr, final_surf, &resourceManager->textureRects.at(i.fileName));
+    }
+
+    if (DEBUG_SAVE_IMAGE)
+        IMG_SavePNG(final_surf, "img.png");
+
+    resourceManager->atlas = SDL_CreateTextureFromSurface(renderer, final_surf);
+    SDL_SetTextureBlendMode(resourceManager->atlas, SDL_BLENDMODE_BLEND);
+
+    SDL_FreeSurface(final_surf);
+    return true;
+}
+
+/**
+ * Simple custom selection sort implementation; I couldn't get things to work with the standard library functions (due to ImageData being a user defined class). I know there's a way to do that but honestly, this is shorter than figuring that out.
+ * @param images The vector to sort
+ */
+static inline void sortImageData(std::vector<ImageData>* images) {
+
+    for (int i = 0; i < images->size() - 1; i++) {
+        int max = images->at(i).height, max_loc = i;
+
+        for (int j = i + 1; j < images->size(); j++) {
+            // using >= because if we have a series of images with equal height,
+            // we want to store the last index of the image with the same height
+            if (images->at(j).height >= max) {
+                max = images->at(j).height;
+                max_loc = j;
+            }
+        }
+        // if heights are equal, compare widths
+        // if widths are equal, same image or at least same dimensions, don't swap
+        // else swap based on width
+        // if the width of a later image is less or equal, we don't want to swap
+        if ((max == images->at(i).height) &&
+            (images->at(i).width <= images->at(max_loc).width))
+            continue;
+
+        // perform the swap
+        ImageData swap_temp = images->at(i);
+        std::swap(images->at(i), images->at(max_loc));
+        images->at(max_loc) = std::move(swap_temp);
+        if (DEBUG_PRINT) {
+            std::cout << "Swapped Image A at location " << i << " with B at location " << max_loc << '\n' << std::endl;
+        }
+    }
+    if (DEBUG_PRINT) {
+        printImageData(images);
+    }
+}
+
+static inline void printImageData(std::vector<ImageData>* images) {
+    for (const auto& i : *images) {
+        std::cout << "File name: " << i.fileName;
+        std::cout << "\nWidth: " << i.width;
+        std::cout << "\nHeight: " << i.height << '\n' << std::endl;
+    }
+}
