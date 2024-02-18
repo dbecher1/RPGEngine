@@ -46,6 +46,10 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
     do {
         success = true;
         for (const auto& img : images) {
+            // Check the edge case here where the image is larger than the boundary itself
+            if (img.width > boundary) {
+                resetPacking(resourceManager, &success, &boundary, &x, &y);
+            }
             // test the width against the boundary
             if (x + img.width > boundary) {
                 if (max_height == 0)
@@ -56,15 +60,7 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
                 max_height = 0;
             }
             if (y + img.height > boundary) {
-                success = false;
-                if (DEBUG_PRINT) {
-                    std::cout << "Boundary size " << boundary;
-                    std::cout << " too small, growing boundary and trying again." << std::endl;
-                }
-                boundary = static_cast<int>(boundary * 1.5);
-                resourceManager->textureRects.clear();
-                x = 0;
-                y = 0;
+                resetPacking(resourceManager, &success, &boundary, &x, &y);
                 break;
             }
             SDL_Rect rect {x, y, img.width, img.height};
@@ -93,6 +89,18 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
 
     SDL_FreeSurface(final_surf);
     return true;
+}
+
+inline void ImagePacker::resetPacking(ResourceManager* rm, bool* success, int* boundary, int* x, int* y) {
+    *success = false;
+    if (DEBUG_PRINT) {
+        std::cout << "Boundary size " << boundary;
+        std::cout << " too small, growing boundary and trying again." << std::endl;
+    }
+    *boundary = static_cast<int>(*boundary * 1.5);
+    rm->textureRects.clear();
+    *x = 0;
+    *y = 0;
 }
 
 /**

@@ -24,12 +24,11 @@ class ResourceManager;
 static inline void sortImageData(std::vector<ImageData>* images);
 static inline void printImageData(std::vector<ImageData>* images);
 
+
 class ImagePacker {
 public:
     bool loadImages(SDL_Renderer* renderer, ResourceManager* resourceManager, const std::string& path);
-
-private:
-
+    static inline void resetPacking(ResourceManager* rm, bool* success, int* boundary, int* x, int* y);
 };
 
 
