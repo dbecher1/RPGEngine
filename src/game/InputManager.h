@@ -5,7 +5,18 @@
 #ifndef RPG_INPUTMANAGER_H
 #define RPG_INPUTMANAGER_H
 
-#include "SDL_events.h"
+#include "SDL_events.h" // TODO: remove
+#include "SDL_scancode.h"
+#include "SDL_keyboard.h"
+
+#define UP_ SDL_SCANCODE_UP
+#define DOWN_ SDL_SCANCODE_DOWN
+#define LEFT_ SDL_SCANCODE_LEFT
+#define RIGHT_ SDL_SCANCODE_RIGHT
+#define W_ SDL_SCANCODE_W
+#define A_ SDL_SCANCODE_A
+#define S_ SDL_SCANCODE_S
+#define D_ SDL_SCANCODE_D
 
 // TODO: remapping
 
@@ -20,10 +31,12 @@ struct InputState {
 
 class InputManager {
 public:
-    static void Poll(SDL_Event& e);
+    static void Init();
+    static void Poll();
     static InputState* GetState();
 private:
     static InputState State;
+    static const Uint8* KeyboardState; // pointer to the SDL array
 };
 
 

@@ -6,7 +6,7 @@
 #define RPG_MAIN_H
 
 #include "SDL.h"
-#include "SDL_image.h"
+#include "SDL2_image/SDL_image.h"
 
 // Function declarations
 inline bool init();

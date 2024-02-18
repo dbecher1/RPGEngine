@@ -3,6 +3,7 @@
 #include "game/ResourceManager.h"
 #include "game/SceneManager.h"
 #include "game/SpriteBatch.h"
+#include "tools/Timer.h"
 #include <cmath>
 #include <string>
 
@@ -12,17 +13,20 @@ ResourceManager* resourceManager;
 SceneManager* sceneManager;
 SpriteBatch* spriteBatch;
 
+const int GOAL_FPS = 60;
+const float CYCLE_TIME = 1.0f / GOAL_FPS;
+static Timer sys_timer;
+float accumulator = 0.0f;
+
 using hr_clock = std::chrono::high_resolution_clock;
 using ms = std::chrono::duration<double, std::milli>;
 
-double goal_fps = 120.0;
-double goal_ms = 1 / goal_fps;
-
 
 int main() {
-    std::cout << goal_ms << std::endl;
+
     if (!init())
         return 1;
+    InputManager::Init();
 
     resourceManager = new ResourceManager();
     resourceManager->loadAllResources(renderer);
@@ -36,28 +40,12 @@ int main() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 100, 255);
 
     auto last = hr_clock::now();
+    double t = 1 / 120.0;
     double dt;
     double fps = 0;
-    int thresh = 500, counter = 0;
-    // AnimationStateMachine stateMachine = resourceManager->asmLoader();
-    int y = 0;
+    int thresh = 256, counter = 0;
 
     do {
-        auto current = hr_clock::now();
-        dt = std::chrono::duration_cast<ms>(current - last).count();
-        last = current;
-        double frame_time = 1000.0 / dt;
-        counter++;
-        if (counter > thresh) {
-            counter = 0;
-            fps /= thresh;
-            // std::cout << (int)fps << std::endl;
-            std::string f = "FPS: " + std::to_string((int)fps);
-            SDL_SetWindowTitle(window, f.c_str());
-            fps = 0;
-        }
-        fps += frame_time;
-
         // Process events
         // TODO: Input handler/mapper
 
@@ -66,37 +54,43 @@ int main() {
                 case SDL_QUIT:
                     quit = true;
                     break;
-                case SDL_KEYDOWN: case SDL_KEYUP:
-                    InputManager::Poll(e);
-                    break;
                 default: break;
             }
         }
+        InputManager::Poll();
+        sys_timer.tick();
+        accumulator += sys_timer.elapsed_seconds;
+
+        if (std::isgreater(accumulator, CYCLE_TIME)) {
+            accumulator -= CYCLE_TIME; // ????
+
+            static Timer physics_timer;
+            physics_timer.tick();
+            // std::cout << physics_timer.elapsed_seconds << std::endl;
+
+            for (auto& e_ : *resourceManager->getEntities()) {
+                e_.Update(physics_timer.elapsed_seconds);
+            }
+            for (auto& e_ : *resourceManager->getEntities()) {
+                e_.Draw(spriteBatch);
+            }
+
+            spriteBatch->Draw();
+        }
+        double frame_time = 1000.0 / sys_timer.elapsed_seconds;
+        counter++;
+        if (counter > thresh) {
+            counter = 0;
+            fps /= thresh;
+            std::string f = "FPS: " + std::to_string((int)fps);
+            SDL_SetWindowTitle(window, f.c_str());
+            fps = 0;
+        }
+        fps += frame_time;
+
         // Update TODO
         // stateMachine.Update(dt);
-
-        DrawCommand dc {
-            .SpriteName = "cafe",
-            .position = {20, 20},
-            .dimensions = {200, 200},
-            .z = 3,
-            .useDimensions = true
-        };
-        // spriteBatch->Add(dc);
-        for (auto& e_ : *resourceManager->getEntities()) {
-            e_.Update(dt);
-            e_.Draw(spriteBatch);
-        }
-
-        spriteBatch->Draw();
-
-        double sleep_time = goal_ms;
-        if (dt < sleep_time) {
-            sleep_time = sleep_time - dt;
-            std::cout << sleep_time << std::endl;
-        }
-        sleep_time *= 1000;
-        std::this_thread::sleep_for(std::chrono::milliseconds(std::lround(sleep_time)));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     } while (!quit);
 
@@ -104,7 +98,6 @@ int main() {
     delete sceneManager;
     delete resourceManager;
     destroy();
-
     return 0;
 }
 

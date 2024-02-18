@@ -55,7 +55,7 @@ void SpriteBatch::Draw() {
         for (const auto& drawable : DrawCommands[i]) {
 
             SDL_Rect rect = resourceManager->getRectFromTextureName(drawable.SpriteName);
-            SDL_Rect r, *dest = nullptr;
+            SDL_FRect r, *dest = nullptr;
 
             if (!drawable.staticSprite) {
                 r.x = drawable.position.x;
@@ -65,14 +65,14 @@ void SpriteBatch::Draw() {
                     r.h = drawable.dimensions.y;
                 }
                 else {
-                    r.w = rect.w;
-                    r.h = rect.h;
+                    r.w = static_cast<float>(rect.w);
+                    r.h = static_cast<float>(rect.h);
                 }
                 if (drawable.useOffset) {
-                    rect.x = rect.x + (drawable.offset.x * drawable.dimensions.x);
-                    rect.y = rect.y + (drawable.offset.y * drawable.dimensions.y);
-                    rect.w = drawable.dimensions.x;
-                    rect.h = drawable.dimensions.y;
+                    rect.x = rect.x + static_cast<int>(drawable.offset.x * drawable.dimensions.x);
+                    rect.y = rect.y + static_cast<int>(drawable.offset.y * drawable.dimensions.y);
+                    rect.w = static_cast<int>(drawable.dimensions.x);
+                    rect.h = static_cast<int>(drawable.dimensions.y);
                 }
                 dest = &r;
             }
@@ -80,7 +80,8 @@ void SpriteBatch::Draw() {
                 dest->w *= SCALE_FACTOR;
                 dest->h *= SCALE_FACTOR;
             }
-            SDL_RenderCopy(renderer, atlas, &rect, dest);
+            // SDL_RenderCopy(renderer, atlas, &rect, dest);
+            SDL_RenderCopyExF(renderer, atlas, &rect, dest, 0, nullptr, SDL_FLIP_NONE);
 
         }
         DrawCommands[i].clear();

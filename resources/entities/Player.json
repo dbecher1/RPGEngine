@@ -6,6 +6,6 @@
     "_Attack", "_Idle", "_Run"
   ],
   "DefaultState": "_Idle",
-  "MoveSpeed": 100,
+  "MoveSpeed": 200,
   "IsPlayer": true
 }

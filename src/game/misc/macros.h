@@ -6,6 +6,7 @@
 #define RPG_MACROS_H
 
 #include <iostream>
+#include "SDL2_image/SDL_image.h"
 
 // Initial window settings
 #define TITLE "Test"

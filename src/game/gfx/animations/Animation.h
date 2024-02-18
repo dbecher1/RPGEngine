@@ -8,6 +8,9 @@
 #include "../DrawCommand.h"
 #include "../../../math/Vector2.h"
 
+// I prefer to store my speed as ints (as ms)
+#define ANIMATION_SPEED_MULTIPLIER 0.001
+
 class Animation {
 public:
     Animation() = delete;

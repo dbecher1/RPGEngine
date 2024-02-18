@@ -6,12 +6,12 @@
 #include <iostream>
 #include <utility>
 
-Entity::Entity(std::string name_, AnimationStateMachine animationSM, int move_speed)
+Entity::Entity(std::string name_, AnimationStateMachine animationSM, float move_speed)
 : name(std::move(name_)), animationStateMachine(std::move(animationSM)), moveSpeed(move_speed) {
     std::cout << name << ": Hi!" << std::endl;
 }
 
-Entity::Entity(std::string name_, AnimationStateMachine animationSM, int move_speed, bool is_animated)
+Entity::Entity(std::string name_, AnimationStateMachine animationSM, float move_speed, bool is_animated)
         : Entity(std::move(name_), std::move(animationSM), move_speed) {
     isAnimated = is_animated;
 }
@@ -32,7 +32,7 @@ void Entity::Update(double dt) {
             delta.x += 1;
     }
     // TODO: normalize Vectors
-    position += delta * static_cast<float>(dt);
+    position += delta * static_cast<float>(dt) * moveSpeed;
 }
 
 void Entity::Draw(SpriteBatch *sb) {
@@ -40,7 +40,7 @@ void Entity::Draw(SpriteBatch *sb) {
     drawCommand.position = position;
     if (isAnimated)
         animationStateMachine.Draw(&drawCommand);
-    sb->Add(std::move(drawCommand));
+    sb->Add(drawCommand);
 }
 
 

@@ -6,7 +6,7 @@
 #define RPG_IMAGEPACKER_H
 
 #include "SDL.h"
-#include "SDL_image.h"
+#include "SDL2_image/SDL_image.h"
 #include "../game/ResourceManager.h"
 #include "../game/misc/macros.h"
 

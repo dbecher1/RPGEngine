@@ -15,8 +15,8 @@ class SpriteBatch;
 class Entity {
 public:
     Entity() = delete;
-    Entity(std::string name_, AnimationStateMachine animationSM, int move_speed);
-    Entity(std::string name_, AnimationStateMachine animationSM, int move_speed, bool is_animated);
+    Entity(std::string name_, AnimationStateMachine animationSM, float move_speed);
+    Entity(std::string name_, AnimationStateMachine animationSM, float move_speed, bool is_animated);
     void Update(double dt);
     void Draw(SpriteBatch* sb);
     void setDefaultAnimationState(const std::string& state);
@@ -25,7 +25,7 @@ protected:
     bool isPlayer = false;
     std::string name;
     Vector2 position{};
-    Vector2f delta{};
+    Vector2 delta{};
     AnimationStateMachine animationStateMachine;
     float moveSpeed;
     bool isAnimated = false;

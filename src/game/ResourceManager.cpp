@@ -73,7 +73,7 @@ AnimationStateMachine ResourceManager::asmLoader() {
             fileName = fileName.substr(0, fileName.find('.'));
 
             auto rect = textureRects.at(fileName);
-            stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {rect.w, rect.h}});
+            stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
         }
     }
     return stateMachine;
@@ -81,7 +81,7 @@ AnimationStateMachine ResourceManager::asmLoader() {
 
 bool ResourceManager::loadEntities() {
 
-    // TODO: might want to -actually- put animation loading in its own folder
+    // TODO: might want to -actually- put animation loading in its own function
 
     for (const auto& file : dir_iter(ENTITY_PATH)) {
         std::ifstream istream(file);
@@ -90,7 +90,7 @@ bool ResourceManager::loadEntities() {
 
         std::string name = manifest["Name"];
         bool isAnimated = manifest["IsAnimated"];
-        int moveSpeed = manifest["MoveSpeed"];
+        float moveSpeed = manifest["MoveSpeed"];
 
         if (isAnimated) {
             std::string subDir(ANIMATION_PATH);
@@ -101,6 +101,8 @@ bool ResourceManager::loadEntities() {
                 animationNames.push_back(s);
             }
             AnimationStateMachine stateMachine;
+
+            // TODO: rename file2 and other such variables to be clearer
 
             for (const auto& file2 : dir_iter(ANIMATION_PATH)) {
                 if (file2.is_regular_file()) {
@@ -121,7 +123,7 @@ bool ResourceManager::loadEntities() {
                     double speed = manifest2["Speed"];
 
                     auto rect = textureRects[fileName];
-                    stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {rect.w, rect.h}});
+                    stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
                 }
             }
             Entity entity(name, stateMachine, moveSpeed, isAnimated);

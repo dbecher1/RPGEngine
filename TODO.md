@@ -2,7 +2,7 @@
 ## #TODO
 Keeping this as a rolling to do list of sots between sessions
 
- - Convert all vectors/rects to floats.... yay
+ - Remote Sprite.cpp/h?
  - Refine entity loading
  - Implement environment loading
  - Map?
