@@ -15,8 +15,12 @@ SpriteBatch* spriteBatch;
 using hr_clock = std::chrono::high_resolution_clock;
 using ms = std::chrono::duration<double, std::milli>;
 
-int main() {
+double goal_fps = 120.0;
+double goal_ms = 1 / goal_fps;
 
+
+int main() {
+    std::cout << goal_ms << std::endl;
     if (!init())
         return 1;
 
@@ -58,8 +62,14 @@ int main() {
         // TODO: Input handler/mapper
 
         while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT) {
-                quit = true;
+            switch (e.type) {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+                case SDL_KEYDOWN: case SDL_KEYUP:
+                    InputManager::Poll(e);
+                    break;
+                default: break;
             }
         }
         // Update TODO
@@ -80,7 +90,13 @@ int main() {
 
         spriteBatch->Draw();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        double sleep_time = goal_ms;
+        if (dt < sleep_time) {
+            sleep_time = sleep_time - dt;
+            std::cout << sleep_time << std::endl;
+        }
+        sleep_time *= 1000;
+        std::this_thread::sleep_for(std::chrono::milliseconds(std::lround(sleep_time)));
 
     } while (!quit);
 

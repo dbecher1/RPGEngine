@@ -124,7 +124,18 @@ bool ResourceManager::loadEntities() {
                     stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {rect.w, rect.h}});
                 }
             }
-            Entities.emplace_back(name, stateMachine, moveSpeed, isAnimated);
+            Entity entity(name, stateMachine, moveSpeed, isAnimated);
+
+            // Optional Fields here
+
+            if (manifest.contains("DefaultState"))
+                entity.setDefaultAnimationState(manifest["DefaultState"]);
+
+            if (manifest.contains("IsPlayer") && (manifest["IsPlayer"]))
+                entity.setPlayer();
+
+            Entities.emplace_back(std::move(entity));
+
             std::cout << "Created new entity " << name << std::endl;
         }
         else {

@@ -31,13 +31,15 @@ add_executable(RPG
         src/game/gfx/Sprite.cpp
         src/game/scenes/Map.cpp
         src/game/scenes/Environment.cpp
-        src/math/Vector2Impl.cpp
+        src/math/Vector2.cpp
         src/game/SpriteBatch.cpp
         src/game/SpriteBatch.h
         src/game/gfx/animations/Animation.cpp
         src/game/gfx/animations/AnimationStateMachine.cpp
         src/game/gfx/animations/AnimationStateMachine.h
         src/game/entities/Entity.cpp
+        src/game/InputManager.cpp
+        src/game/InputManager.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

@@ -5,5 +5,7 @@
   "Animations": [
     "_Attack", "_Idle", "_Run"
   ],
-  "MoveSpeed": 100
+  "DefaultState": "_Idle",
+  "MoveSpeed": 100,
+  "IsPlayer": true
 }

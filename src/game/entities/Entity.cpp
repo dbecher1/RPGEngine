@@ -11,9 +11,28 @@ Entity::Entity(std::string name_, AnimationStateMachine animationSM, int move_sp
     std::cout << name << ": Hi!" << std::endl;
 }
 
+Entity::Entity(std::string name_, AnimationStateMachine animationSM, int move_speed, bool is_animated)
+        : Entity(std::move(name_), std::move(animationSM), move_speed) {
+    isAnimated = is_animated;
+}
+
 void Entity::Update(double dt) {
     animationStateMachine.Update(dt);
     // other things here
+    delta = {0.0f, 0.0f};
+    if (isPlayer) {
+        InputState inputState = *InputManager::GetState();
+        if (inputState.Up)
+            delta.y += -1;
+        if (inputState.Down)
+            delta.y += 1;
+        if (inputState.Left)
+            delta.x += -1;
+        if (inputState.Right)
+            delta.x += 1;
+    }
+    // TODO: normalize Vectors
+    position += delta * static_cast<float>(dt);
 }
 
 void Entity::Draw(SpriteBatch *sb) {
@@ -24,9 +43,14 @@ void Entity::Draw(SpriteBatch *sb) {
     sb->Add(std::move(drawCommand));
 }
 
-Entity::Entity(std::string name_, AnimationStateMachine animationSM, int move_speed, bool is_animated)
-: Entity(name_, animationSM, move_speed) {
-    isAnimated = is_animated;
+
+
+void Entity::setDefaultAnimationState(const std::string &state) {
+    animationStateMachine.SetState(state);
+}
+
+void Entity::setPlayer() {
+    isPlayer = true;
 }
 
 
