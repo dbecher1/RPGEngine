@@ -6,6 +6,7 @@
 #include <iostream>
 
 void AnimationStateMachine::Draw(DrawCommand *dc) {
+    dc->SpriteName = currentState.c_str();
     animationStates.at(currentState).Draw(dc);
 }
 
@@ -23,5 +24,5 @@ void AnimationStateMachine::AddAnimation(const std::string &name, Animation anim
     animationStates.emplace(name, anim);
     if (currentState.empty())
         currentState = name;
-    std::cout << "Successfully added animation " << name << " to state machine";
+    std::cout << "Successfully added animation " << name << " to state machine" << std::endl;
 }

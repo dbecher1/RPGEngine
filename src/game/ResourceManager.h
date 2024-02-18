@@ -7,9 +7,10 @@
 
 #include "SDL.h"
 #include "../tools/ImagePacker.h"
-#include "gfx/animations/AnimationStateMachine.h"
+#include "entities/Entity.h"
 
 #include <string>
+#include <vector>
 #include <map>
 
 class ImagePacker;
@@ -30,13 +31,17 @@ public:
 
     // THIS IS A TEST METHOD
     AnimationStateMachine asmLoader();
+    // THIS IS ALSO A TEST
+    std::vector<Entity>* getEntities();
 
 private:
 
     bool loadTextures(SDL_Renderer* renderer);
     bool loadAnimations();
+    bool loadEntities();
 
     std::map<std::string, SDL_Rect> textureRects;
+    std::vector<Entity> Entities;
     SDL_Texture* atlas;
 
     friend class ImagePacker;

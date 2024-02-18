@@ -1,0 +1,9 @@
+{
+  "Name": "Player1",
+  "IsAnimated": true,
+  "Directory": ".",
+  "Animations": [
+    "_Attack", "_Idle", "_Run"
+  ],
+  "MoveSpeed": 100
+}

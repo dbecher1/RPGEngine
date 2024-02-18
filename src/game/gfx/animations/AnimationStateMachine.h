@@ -5,7 +5,6 @@
 #ifndef RPG_ANIMATIONSTATEMACHINE_H
 #define RPG_ANIMATIONSTATEMACHINE_H
 
-#include "../DrawCommand.h"
 #include "Animation.h"
 #include <string>
 #include <map>

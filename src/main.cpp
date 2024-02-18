@@ -35,7 +35,7 @@ int main() {
     double dt;
     double fps = 0;
     int thresh = 500, counter = 0;
-    AnimationStateMachine stateMachine = resourceManager->asmLoader();
+    // AnimationStateMachine stateMachine = resourceManager->asmLoader();
     int y = 0;
 
     do {
@@ -63,7 +63,7 @@ int main() {
             }
         }
         // Update TODO
-        stateMachine.Update(dt);
+        // stateMachine.Update(dt);
 
         DrawCommand dc {
             .SpriteName = "cafe",
@@ -73,14 +73,10 @@ int main() {
             .useDimensions = true
         };
         // spriteBatch->Add(dc);
-
-        DrawCommand dc2 {
-                .SpriteName = "_Attack",
-                .position = {20, 20},
-                .z = 3,
-        };
-        stateMachine.Draw(&dc2);
-        spriteBatch->Add(dc2);
+        for (auto& e_ : *resourceManager->getEntities()) {
+            e_.Update(dt);
+            e_.Draw(spriteBatch);
+        }
 
         spriteBatch->Draw();
 

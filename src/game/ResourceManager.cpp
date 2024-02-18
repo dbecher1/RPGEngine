@@ -14,6 +14,7 @@
 
 #define TEST_PATH "../resources/images/"
 #define ANIMATION_PATH "../resources/animations/"
+#define ENTITY_PATH "../resources/entities/"
 #define RESOURCE_IMAGE_PATH ""
 
 using dir_iter = std::filesystem::recursive_directory_iterator;
@@ -38,10 +39,9 @@ bool ResourceManager::loadAllResources(SDL_Renderer* renderer) {
         }
         std::cout << "===END TEXTURE RECT INFORMATION===\n" << std::endl;
     }
+    flag = flag && this->loadEntities();
     return flag;
 }
-
-
 
 SDL_Rect ResourceManager::getRectFromTextureName(const std::string &fileName) {
     if (this->textureRects.count(fileName) == 0)
@@ -56,6 +56,7 @@ bool ResourceManager::loadTextures(SDL_Renderer* renderer) {
 }
 
 AnimationStateMachine ResourceManager::asmLoader() {
+    std::cerr << "Using asmLoader method! For debugging only, ye been warned..." << std::endl;
     AnimationStateMachine stateMachine;
     for (const auto& file : dir_iter(ANIMATION_PATH)) {
         if (file.is_regular_file()) {
@@ -78,8 +79,70 @@ AnimationStateMachine ResourceManager::asmLoader() {
     return stateMachine;
 }
 
+bool ResourceManager::loadEntities() {
+
+    // TODO: might want to -actually- put animation loading in its own folder
+
+    for (const auto& file : dir_iter(ENTITY_PATH)) {
+        std::ifstream istream(file);
+        json manifest = json::parse(istream);
+        istream.close();
+
+        std::string name = manifest["Name"];
+        bool isAnimated = manifest["IsAnimated"];
+        int moveSpeed = manifest["MoveSpeed"];
+
+        if (isAnimated) {
+            std::string subDir(ANIMATION_PATH);
+            subDir.append(manifest["Directory"]);
+
+            std::vector<std::string> animationNames;
+            for (auto& s : manifest["Animations"]) {
+                animationNames.push_back(s);
+            }
+            AnimationStateMachine stateMachine;
+
+            for (const auto& file2 : dir_iter(ANIMATION_PATH)) {
+                if (file2.is_regular_file()) {
+
+                    // chop off the extension
+                    std::string fileName = file2.path().filename().string();
+                    fileName = fileName.substr(0, fileName.find('.'));
+
+                    if (std::count(animationNames.begin(), animationNames.end(),fileName) == 0)
+                        continue;
+
+                    std::ifstream istream2(file2);
+                    json manifest2 = json::parse(istream2);
+                    istream2.close();
+
+                    int framesX = manifest2["FramesX"];
+                    int framesY = manifest2["FramesY"];
+                    double speed = manifest2["Speed"];
+
+                    auto rect = textureRects[fileName];
+                    stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {rect.w, rect.h}});
+                }
+            }
+            Entities.emplace_back(name, stateMachine, moveSpeed, isAnimated);
+            std::cout << "Created new entity " << name << std::endl;
+        }
+        else {
+
+        }
+    }
+
+    return true;
+}
+
 bool ResourceManager::loadAnimations() {
     // TODO
     return false;
 }
+
+std::vector<Entity> *ResourceManager::getEntities() {
+    return &Entities;
+}
+
+
 

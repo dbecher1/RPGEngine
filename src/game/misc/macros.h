@@ -30,7 +30,7 @@
 #else
 // make this true/false depending on if we want to print
 // I find this easier than combing through the function to find the print statement
-#define DEBUG_PRINT true
+#define DEBUG_PRINT false
 // flag to save the packed image, not going to be done in production
 #define SAVE_IMG true
 #endif
