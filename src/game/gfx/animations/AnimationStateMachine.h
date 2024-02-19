@@ -15,14 +15,18 @@ public:
     // TODO: create AnimationStateMachine constructor
     void Update(double dt);
     // Do nothing on same state
-    void SetState(const std::string& state);
+    void SetState(const std::string& state_);
     void Draw(DrawCommand* dc);
 
     // TODO this might be temporary
     void AddAnimation(const std::string& name, Animation anim);
+    void AddAnimation(const std::string& name, Animation anim, int eid_);
 private:
+    int eid = -1;
     std::string currentState;
     std::map<std::string, Animation> animationStates;
+    // More to store in memory, but will make our access time faster by caching the appends
+    std::map<std::string, std::string> eidAppends;
 };
 
 

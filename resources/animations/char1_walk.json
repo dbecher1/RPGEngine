@@ -1,0 +1,9 @@
+{
+  "FramesX": 8,
+  "FramesY": 1,
+  "NumAnimations": 4,
+  "Names": [
+    "WalkDown", "WalkUp", "WalkRight", "WalkLeft"
+  ],
+  "Speed": 125
+}

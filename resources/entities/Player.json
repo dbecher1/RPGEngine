@@ -7,5 +7,5 @@
   ],
   "DefaultState": "_Idle",
   "MoveSpeed": 200,
-  "IsPlayer": true
+  "IsPlayer": false
 }

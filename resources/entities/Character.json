@@ -1,0 +1,11 @@
+{
+  "Name": "Character",
+  "IsAnimated": true,
+  "Directory": ".",
+  "Animations": [
+    "char1_walk"
+  ],
+  "DefaultState": "WalkDown",
+  "MoveSpeed": 200,
+  "IsPlayer": true
+}

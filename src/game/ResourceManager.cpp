@@ -103,27 +103,53 @@ bool ResourceManager::loadEntities() {
             AnimationStateMachine stateMachine;
 
             // TODO: rename file2 and other such variables to be clearer
+            int eid = -1;
 
-            for (const auto& file2 : dir_iter(ANIMATION_PATH)) {
-                if (file2.is_regular_file()) {
+            for (const auto& animation_file : dir_iter(ANIMATION_PATH)) {
+                if (animation_file.is_regular_file()) {
 
                     // chop off the extension
-                    std::string fileName = file2.path().filename().string();
-                    fileName = fileName.substr(0, fileName.find('.'));
+                    std::string animation_fileName = animation_file.path().filename().string();
+                    animation_fileName = animation_fileName.substr(0, animation_fileName.find('.'));
 
-                    if (std::count(animationNames.begin(), animationNames.end(),fileName) == 0)
+                    if (std::count(animationNames.begin(), animationNames.end(), animation_fileName) == 0)
                         continue;
 
-                    std::ifstream istream2(file2);
-                    json manifest2 = json::parse(istream2);
-                    istream2.close();
+                    std::ifstream animation_istream(animation_file);
+                    json animation_manifest = json::parse(animation_istream);
+                    animation_istream.close();
 
-                    int framesX = manifest2["FramesX"];
-                    int framesY = manifest2["FramesY"];
-                    double speed = manifest2["Speed"];
+                    int framesX = animation_manifest["FramesX"];
+                    int framesY = animation_manifest["FramesY"];
+                    double speed = animation_manifest["Speed"];
 
-                    auto rect = textureRects[fileName];
-                    stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
+                    auto rect = textureRects[animation_fileName];
+
+                    // animations will either be singular or plural
+                    // If plural, it will contain the field "NumAnimations"
+                    if (animation_manifest.contains("NumAnimations")) {
+                        int numAnimations = animation_manifest["NumAnimations"];
+                        int rowHeight = static_cast<int>(rect.h / numAnimations);
+                        SDL_Rect subRect{rect.x, rect.y, rect.w, rowHeight};
+
+                        // Have to create sub rects and store them in the map before creating animation
+                        for (int i = 0; i < numAnimations; i++) {
+                            SDL_Rect newSrc = {subRect.x,
+                                               subRect.y + (rowHeight * i),
+                                               rect.w,
+                                               rowHeight};
+                            std::string newSrcName = animation_manifest["Names"][i];
+                            eid = Entity::EID; // the next entity to be created will have this value
+                            stateMachine.AddAnimation(newSrcName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rowHeight)}}, eid);
+                            newSrcName.append(std::to_string(eid));
+                            //textureRects[newSrcName] = newSrc;
+                            textureRects.emplace(newSrcName, newSrc);
+
+                        }
+                    }
+                    else {
+                        stateMachine.AddAnimation(animation_fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
+                    }
                 }
             }
             Entity entity(name, stateMachine, moveSpeed, isAnimated);
