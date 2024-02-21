@@ -12,8 +12,11 @@
 
 bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceManager, const std::string& path) {
     // TODO: add error checking
+    // TODO: fix pathing issues for release builds (long term)
 
     std::vector<ImageData> images;
+
+    std::cout << std::filesystem::current_path() << std::endl;
 
     for (const auto &file : std::filesystem::recursive_directory_iterator(path)) {
         if (file.is_regular_file()) {
@@ -75,7 +78,7 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
         }
     } while (!success);
 
-    SDL_Surface* final_surf = SDL_CreateRGBSurfaceWithFormat(0, boundary, final_height, 32, SDL_PIXELFORMAT_ABGR8888);
+    SDL_Surface* final_surf = SDL_CreateRGBSurfaceWithFormat(0, boundary, final_height, 32, PIXEL_FORMAT);
 
     for (const auto& i : images) {
         SDL_BlitSurface(i.data, nullptr, final_surf, &resourceManager->textureRects.at(i.fileName));

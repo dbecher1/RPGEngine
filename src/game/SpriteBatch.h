@@ -22,18 +22,29 @@
 
 #define NUM_DRAW_LAYERS 10
 #define NUM_THREADS 3
+// TODO: REVISIT DRAW LAYER COUNT!!
+#define DRAW_LAYER_COUNT 50
 
 class SpriteBatch {
 public:
     SpriteBatch(SDL_Renderer* renderer_, ResourceManager* resourceManager_);
+    ~SpriteBatch();
     void Draw();
     void Add(DrawCommand drawCommand);
+
+    void resetDefaultWindowSize(SDL_Window* window);
+    void windowResizeEvent(int new_width, int new_height);
 private:
+    void calculateResize();
+    int windowWidth, windowHeight, screenWidth{}, screenHeight{};
+    float aspectRatio;
+    bool letterbox{};
+    int letter_offset{};
     SDL_Renderer* renderer;
     SDL_Texture* atlas;
     ResourceManager* resourceManager;
     std::array<std::vector<DrawCommand>, NUM_DRAW_LAYERS> DrawCommands;
-
+    SDL_Texture* renderTarget;
 };
 
 

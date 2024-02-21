@@ -7,5 +7,6 @@
   ],
   "DefaultState": "_Idle",
   "MoveSpeed": 200,
-  "IsPlayer": false
+  "IsPlayer": false,
+  "Z": 3
 }

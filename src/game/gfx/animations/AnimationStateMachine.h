@@ -17,6 +17,8 @@ public:
     // Do nothing on same state
     void SetState(const std::string& state_);
     void Draw(DrawCommand* dc);
+    void Stop();
+    bool isPlaying();
 
     // TODO this might be temporary
     void AddAnimation(const std::string& name, Animation anim);
@@ -27,6 +29,7 @@ private:
     std::map<std::string, Animation> animationStates;
     // More to store in memory, but will make our access time faster by caching the appends
     std::map<std::string, std::string> eidAppends;
+    bool is_playing;
 };
 
 

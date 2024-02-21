@@ -8,6 +8,8 @@
 #include "SDL.h"
 #include "../tools/ImagePacker.h"
 #include "entities/Entity.h"
+#include "gfx/Environment.h"
+#include "world/Maps.h"
 
 #include <string>
 #include <vector>
@@ -15,6 +17,7 @@
 
 class ImagePacker;
 class SpriteBatch;
+class Maps;
 
 class ResourceManager {
 public:
@@ -34,15 +37,28 @@ public:
     // THIS IS ALSO A TEST
     std::vector<Entity>* getEntities();
 
+    Environment* getEnvironment(const std::string& name);
+    Maps* getMap(const std::string& name);
+
 private:
 
     bool loadTextures(SDL_Renderer* renderer);
+    bool loadMaps(SDL_Renderer* renderer);
     bool loadAnimations();
     bool loadEntities();
+    bool loadEnvironments();
+
+    // Static helpers for textures and file management
+    static void writeTexture(SDL_Texture* texture, SDL_Renderer* renderer, const std::string& name);
+    static std::string createLocalFileName(const std::string& name);
 
     std::map<std::string, SDL_Rect> textureRects;
+    std::map<std::string, Environment> environments;
+    std::map<std::string, Maps> maps;
     std::vector<Entity> Entities;
     SDL_Texture* atlas;
+
+    std::vector<std::string> TEMP_fileNames; // used to make sure we don't double load tilemap textures
 
     friend class ImagePacker;
     friend class SpriteBatch;

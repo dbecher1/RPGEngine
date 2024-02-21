@@ -7,7 +7,6 @@
 
 #include <vector>
 #include "../entities/Entity.h"
-#include "Environment.h"
 
 class Scene {
 public:
@@ -17,7 +16,6 @@ public:
 private:
     bool isActive = true;
     std::vector<Entity> activeEntities;
-    Environment environment;
 };
 
 

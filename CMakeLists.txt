@@ -30,7 +30,7 @@ add_executable(RPG
         src/tools/ImagePacker.cpp
         src/game/gfx/Sprite.cpp
         src/game/scenes/Map.cpp
-        src/game/scenes/Environment.cpp
+        src/game/gfx/Environment.cpp
         src/math/Vector2.cpp
         src/game/SpriteBatch.cpp
         src/game/SpriteBatch.h
@@ -42,6 +42,11 @@ add_executable(RPG
         src/game/InputManager.h
         src/tools/Timer.cpp
         src/tools/Timer.h
+        src/math/MiscMath.h
+        src/tools/MapLoader.cpp
+        src/game/world/Maps.cpp
+        src/game/world/Maps.h
+        src/tools/Tile.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

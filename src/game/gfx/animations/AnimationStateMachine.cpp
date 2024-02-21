@@ -11,10 +11,13 @@ void AnimationStateMachine::Draw(DrawCommand *dc) {
 }
 
 void AnimationStateMachine::Update(double dt) {
+    if (!is_playing) return;
     animationStates.at(currentState).Update(dt);
 }
 
 void AnimationStateMachine::SetState(const std::string &state_) {
+    if (!is_playing)
+        is_playing = true;
     // If we're using the eid, get that value from the appends map
     std::string state = (eid != -1) ? eidAppends[state_] : state_;
     if (state == currentState) return;
@@ -38,4 +41,13 @@ void AnimationStateMachine::AddAnimation(const std::string &name, Animation anim
     newName.append(std::to_string(eid));
     eidAppends.emplace(name, newName);
     AddAnimation(newName, anim);
+}
+
+/**
+ * Stops the animation from playing.
+ * Any call to setstate will restart the playing
+ */
+void AnimationStateMachine::Stop() {
+    is_playing = false;
+    animationStates.at(currentState).Reset();
 }

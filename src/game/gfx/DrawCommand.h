@@ -6,6 +6,9 @@
 #define RPG_DRAWCOMMAND_H
 
 #include "../../math/Vector2.h"
+#include "SDL_rect.h"
+#include "../../tools/Tile.h"
+#include <vector>
 
 // TODO: expand upon descriptions for everything
 // TODO: add in an origin offset
@@ -19,6 +22,9 @@ struct DrawCommand {
     bool useOffset = false;
     bool useDimensions = false;
     bool staticSprite = false;
+    bool overrideSrcRect = false;
+    // std::vector<SDL_Rect>* override{};
+    Tile* tileOverride{};
 };
 
 

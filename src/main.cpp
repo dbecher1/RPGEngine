@@ -5,7 +5,6 @@
 #include "game/SpriteBatch.h"
 #include "tools/Timer.h"
 #include <cmath>
-#include <string>
 
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -17,10 +16,6 @@ const int GOAL_FPS = 60;
 const float CYCLE_TIME = 1.0f / GOAL_FPS;
 static Timer sys_timer;
 float accumulator = 0.0f;
-
-using hr_clock = std::chrono::high_resolution_clock;
-using ms = std::chrono::duration<double, std::milli>;
-
 
 int main() {
 
@@ -37,13 +32,10 @@ int main() {
 
     bool quit = false;
     SDL_Event e;
-    SDL_SetRenderDrawColor(renderer, 0, 0, 100, 255);
 
-    auto last = hr_clock::now();
-    double t = 1 / 120.0;
-    double dt;
-    double fps = 0;
-    int thresh = 256, counter = 0;
+    Environment* env = resourceManager->getEnvironment("Field");
+    Maps* maps = resourceManager->getMap("demo");
+    maps->Dump();
 
     do {
         // Process events
@@ -54,6 +46,20 @@ int main() {
                 case SDL_QUIT:
                     quit = true;
                     break;
+                case SDL_WINDOWEVENT:
+                    switch (e.window.event) {
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                        case SDL_WINDOWEVENT_RESIZED:
+                            spriteBatch->windowResizeEvent(e.window.data1, e.window.data2);
+                            break;
+                        default: break;
+                    }
+                    break;
+                case SDL_KEYDOWN:
+                    if (e.key.keysym.scancode == SDL_SCANCODE_5) {
+                        std::cout << "Manual resize to default!" << std::endl;
+                        spriteBatch->resetDefaultWindowSize(window);
+                    }
                 default: break;
             }
         }
@@ -74,24 +80,20 @@ int main() {
             for (auto& e_ : *resourceManager->getEntities()) {
                 e_.Draw(spriteBatch);
             }
+            // TODO: fix environment draw
+            /*
+            DrawCommand envDraw;
+            env->Draw(&envDraw);
+            spriteBatch->Add(envDraw);
+             */
+            maps->Draw(spriteBatch);
 
             spriteBatch->Draw();
         }
-        double frame_time = 1000.0 / sys_timer.elapsed_seconds;
-        counter++;
-        if (counter > thresh) {
-            counter = 0;
-            fps /= thresh;
-            std::string f = "FPS: " + std::to_string((int)fps);
-            SDL_SetWindowTitle(window, f.c_str());
-            fps = 0;
-        }
-        fps += frame_time;
 
         // Update TODO
         // stateMachine.Update(dt);
         // std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
     } while (!quit);
 
     delete spriteBatch;

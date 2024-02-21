@@ -6,21 +6,25 @@
 #define RPG_MACROS_H
 
 #include <iostream>
+#include "SDL.h"
 #include "SDL2_image/SDL_image.h"
 
 // Initial window settings
 #define TITLE "Test"
-#define INITIAL_WIDTH 640
+#define INITIAL_WIDTH 720
 #define INITIAL_HEIGHT 480
+#define ASPECT_RATIO 1.5
 
 // Flags
 #define IMG_FLAGS IMG_INIT_PNG
 #define INIT_FLAGS (SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_VIDEO | SDL_INIT_TIMER)
-#define WINDOW_FLAGS 0
+#define WINDOW_FLAGS SDL_WINDOW_RESIZABLE
 #define RENDERER_FLAGS 0
+#define PIXEL_FORMAT SDL_PIXELFORMAT_ABGR8888
 
 // Other useful macros/misc
 #define ERROR_QUIT std::cerr << SDL_GetError() << std::endl; return false;
+#define EPSILON 0.00001f
 
 // Flag to indicate if the filename will include the file extension
 // Probably will always keep this false

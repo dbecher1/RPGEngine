@@ -8,26 +8,17 @@
 
 int Entity::EID = 0;
 
-Entity::Entity(std::string name_, AnimationStateMachine animationSM, float move_speed)
-: name(std::move(name_)), animationStateMachine(std::move(animationSM)), moveSpeed(move_speed) {
-    // std::cout << name << ": Hi!" << std::endl;
+Entity::Entity(const EntityBuilder& eb) :
+    name(eb.name), animationStateMachine(eb.animationStateMachine),
+    moveSpeed(eb.move_speed), isAnimated(eb.animated),
+    z_layer(eb.z), isPlayer(eb.is_player) {
+    if (eb.defaultAnim.has_value())
+        animationStateMachine.SetState(eb.defaultAnim.value());
     id = EID++;
-}
-
-Entity::Entity(std::string name_, AnimationStateMachine animationSM, float move_speed, bool is_animated)
-        : Entity(std::move(name_), std::move(animationSM), move_speed) {
-    isAnimated = is_animated;
-}
-
-Entity::Entity(EntityBuilder eb) {
-    if (eb.use_eid) {
-        Entity(eb.name, eb.animationStateMachine, eb.move_speed, true);
-    }
 }
 
 
 void Entity::Update(double dt) {
-    animationStateMachine.Update(dt);
     // other things here
     delta = {0.0f, 0.0f};
     if (isPlayer) {
@@ -41,27 +32,42 @@ void Entity::Update(double dt) {
         if (inputState.Right)
             delta.x += 1;
     }
-    // TODO: normalize Vectors
+    // TODO: make this state machine more robust
+    // Particularly, make the animation names more.. concrete
+    lastState = currState;
+    if (delta.y == 0.0f) {
+        if (delta.x > 0.0f) {
+            currState = "WalkRight";
+        }
+        else if (delta.x < 0.0f) {
+            currState = "WalkLeft";
+        }
+    }
+    else if (delta.y > 0) {
+        currState = "WalkDown";
+    }
+    else if (delta.y < 0) {
+        currState = "WalkUp";
+    }
+    if (lastState != currState)
+        animationStateMachine.SetState(currState);
+
+    // TODO: this is only for sprites that have no idle animation... check that
+    if (!delta.isZero()) {
+        animationStateMachine.Update(dt);
+    } else {
+        animationStateMachine.Stop();
+    }
+    delta.TryNormalize();
     position += delta * static_cast<float>(dt) * moveSpeed;
 }
 
 void Entity::Draw(SpriteBatch *sb) {
     DrawCommand drawCommand;
     drawCommand.position = position;
+    drawCommand.z = z_layer;
     if (isAnimated)
         animationStateMachine.Draw(&drawCommand);
     sb->Add(drawCommand);
 }
-
-
-
-void Entity::setDefaultAnimationState(const std::string &state) {
-    animationStateMachine.SetState(state);
-}
-
-void Entity::setPlayer() {
-    isPlayer = true;
-}
-
-
 

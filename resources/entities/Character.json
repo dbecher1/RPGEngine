@@ -7,5 +7,6 @@
   ],
   "DefaultState": "WalkDown",
   "MoveSpeed": 200,
-  "IsPlayer": true
+  "IsPlayer": true,
+  "Z": 3
 }
