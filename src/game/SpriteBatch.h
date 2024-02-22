@@ -27,17 +27,20 @@
 #define DRAW_LAYER_COUNT 50
 
 struct SpriteBatchBuilder {
-    SDL_Renderer* renderer;
+    SDL_Window* window;
     ResourceManager* resourceManager;
     Camera* camera;
 };
+
+class SceneManager;
+class ResourceManager;
 
 class SpriteBatch {
 public:
     SpriteBatch() = delete;
     SpriteBatch(SpriteBatchBuilder sbb);
     ~SpriteBatch();
-    void Draw();
+    void SubmitDraw();
     void Add(DrawCommand drawCommand);
 
     void resetDefaultWindowSize(SDL_Window* window);
@@ -50,10 +53,13 @@ private:
     int letter_offset{};
     Camera* camera;
     SDL_Renderer* renderer;
-    SDL_Texture* atlas;
+    SDL_Texture* atlas = nullptr;
     ResourceManager* resourceManager;
     std::array<std::vector<DrawCommand>, NUM_DRAW_LAYERS> DrawCommands;
     SDL_Texture* renderTarget;
+
+    friend class SceneManager;
+    friend class ResourceManager;
 };
 
 

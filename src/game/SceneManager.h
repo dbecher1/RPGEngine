@@ -5,18 +5,29 @@
 #ifndef RPG_SCENEMANAGER_H
 #define RPG_SCENEMANAGER_H
 
-#include <stack>
+#include <deque>
 #include "scenes/Scene.h"
+#include "ResourceManager.h"
+#include "SpriteBatch.h"
 
 // UI goes here??
 
 class SceneManager {
 
 public:
+    explicit SceneManager(SDL_Window* window);
+    ~SceneManager();
     void Update(double dt);
+    void FixedUpdate();
+    void Draw();
 
+    void windowResizeEvent(int w, int h);
+    void resetDefaultWindowSize(SDL_Window* window);
 private:
-    std::stack<Scene> SceneStack;
+    std::deque<Scene> SceneStack;
+    SpriteBatch* spriteBatch;
+    ResourceManager* resourceManager;
+    Camera camera{};
 };
 
 

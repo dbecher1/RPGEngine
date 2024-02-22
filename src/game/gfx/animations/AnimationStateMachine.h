@@ -16,7 +16,7 @@ public:
     void Update(double dt);
     // Do nothing on same state
     void SetState(const std::string& state_);
-    void Draw(DrawCommand* dc);
+    void Draw(DrawCommand* dc) const;
     void Stop();
     bool isPlaying();
 

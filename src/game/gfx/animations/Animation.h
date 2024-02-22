@@ -16,7 +16,7 @@ public:
     //Animation() = delete;
     Animation(int framesX,int framesY, double speed, Vector2 atlasSize);
     void Update(double dt);
-    void Draw(DrawCommand* dc);
+    void Draw(DrawCommand* dc) const;
     void Reset();
 private:
     Vector2 size;

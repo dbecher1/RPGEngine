@@ -6,7 +6,7 @@
     "char1_walk"
   ],
   "DefaultState": "WalkDown",
-  "MoveSpeed": 200,
+  "MoveSpeed": 100,
   "IsPlayer": true,
   "Z": 3
 }

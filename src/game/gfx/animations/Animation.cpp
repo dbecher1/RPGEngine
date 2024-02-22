@@ -20,7 +20,7 @@ void Animation::Update(double dt) {
     }
 }
 
-void Animation::Draw(DrawCommand *dc) {
+void Animation::Draw(DrawCommand *dc) const {
     dc->useOffset = true;
     dc->useDimensions = true;
     dc->offset.x = static_cast<float>(currentFrame % numFramesX);

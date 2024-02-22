@@ -8,9 +8,16 @@
 #include <SDL_timer.h>
 
 struct Timer {
-    Uint64 previous_ticks{};
-    float elapsed_seconds{};
     void tick();
+    double dt{};
+private:
+    Uint64 current_1{};
+    Uint64 previous_1{};
+    Uint64 current_2{};
+    Uint64 previous_2{};
+    double dt_1{};
+    double dt_2{};
+    bool flip{};
 };
 
 

@@ -59,15 +59,18 @@ void Entity::Update(double dt) {
         animationStateMachine.Stop();
     }
     delta.TryNormalize();
-    position += delta * static_cast<float>(dt) * moveSpeed;
 }
 
-void Entity::Draw(SpriteBatch *sb) {
-    DrawCommand drawCommand;
-    drawCommand.position = position;
-    drawCommand.z = z_layer;
-    if (isAnimated)
-        animationStateMachine.Draw(&drawCommand);
-    sb->Add(drawCommand);
+void Entity::FixedUpdate() {
+    position += delta * moveSpeed * FIXED_UPDATE_INTERVAL;
 }
+
+void Entity::Draw(DrawCommand *dc) const {
+    dc->position = position;
+    dc->z = z_layer;
+    if (isAnimated)
+        animationStateMachine.Draw(dc);
+}
+
+
 

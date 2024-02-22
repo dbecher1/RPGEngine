@@ -5,9 +5,16 @@
 #include "Timer.h"
 
 void Timer::tick() {
-    const Uint64 current_ticks = SDL_GetPerformanceCounter();
-    const Uint64 delta = current_ticks - previous_ticks;
-    previous_ticks = current_ticks;
-    static const Uint64 TICKS_PER_SECOND = SDL_GetPerformanceFrequency();
-    elapsed_seconds = static_cast<float>(delta) / static_cast<float>(TICKS_PER_SECOND);
+    if (flip) {
+        current_1 = SDL_GetPerformanceCounter();
+        dt_1 = static_cast<double>(current_1 - previous_1) / static_cast<double>(SDL_GetPerformanceFrequency());
+        previous_1 = current_1;
+    }
+    else {
+        current_2 = SDL_GetPerformanceCounter();
+        dt_2 = static_cast<double>(current_2 - previous_2) / static_cast<double>(SDL_GetPerformanceFrequency());
+        previous_2 = current_2;
+    }
+    flip = !flip;
+    dt = (dt_1 + dt_2) * 0.5;
 }

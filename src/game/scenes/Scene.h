@@ -7,15 +7,31 @@
 
 #include <vector>
 #include "../entities/Entity.h"
+#include "../world/Maps.h"
+
+struct SceneBuilder {
+    std::string name;
+    std::string map_name;
+    std::vector<std::string> entities;
+    bool is_active;
+};
+
+class ResourceManager;
+
+// TODO: Make scene into an abstract class with inheritance
 
 class Scene {
 public:
-    Scene();
+    Scene(const SceneBuilder& sb, ResourceManager* rm);
     void Update(double dt);
-
+    void FixedUpdate();
+    void AddEntity(const std::string& name);
+    void Draw(SpriteBatch* sb) const;
 private:
-    bool isActive = true;
-    std::vector<Entity> activeEntities;
+    std::string sceneName;
+    bool isActive;
+    std::vector<Entity*> activeEntities;
+    Maps* map;
 };
 
 

@@ -13,7 +13,7 @@ class SpriteBatch;
 
 class Camera {
 public:
-    Camera() = delete;
+    Camera() = default;
     Camera(SDL_Renderer* renderer_, int screen_width, int screen_height);
     ~Camera();
 

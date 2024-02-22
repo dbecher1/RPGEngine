@@ -27,7 +27,8 @@ public:
     Entity() = delete;
     explicit Entity(const EntityBuilder& eb);
     void Update(double dt);
-    void Draw(SpriteBatch* sb);
+    void FixedUpdate();
+    void Draw(DrawCommand *dc) const;
     int getId();
     static int EID;
 protected:

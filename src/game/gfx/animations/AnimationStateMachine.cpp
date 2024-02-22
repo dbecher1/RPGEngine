@@ -5,7 +5,7 @@
 #include "AnimationStateMachine.h"
 #include <iostream>
 
-void AnimationStateMachine::Draw(DrawCommand *dc) {
+void AnimationStateMachine::Draw(DrawCommand *dc) const {
     dc->SpriteName = currentState.c_str();
     animationStates.at(currentState).Draw(dc);
 }

@@ -5,22 +5,29 @@
 #include "SpriteBatch.h"
 #include "../math/MiscMath.h"
 #include <memory>
+#include <chrono>
 
 #define USE_THREADING false
 #define SCALE false
 #define SCALE_FACTOR 1
 
+using hr_clock = std::chrono::high_resolution_clock;
+
 // TODO: Fix resize glitch where the width starts to get clipped
 // I know -where- the bug is, just haven't figured out the best way to fix it...
 
 SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
-: renderer(sbb.renderer), resourceManager(sbb.resourceManager),
+: resourceManager(sbb.resourceManager),
 camera(sbb.camera) {
+
+    renderer = SDL_CreateRenderer(sbb.window, -1, RENDERER_FLAGS);
+
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    atlas = resourceManager->atlas;
+    // atlas = resourceManager->atlas;
     DrawCommands.fill({});
     // Set an initial capacity of 50 objects
     // This maths out to just under 20kb of memory reserved for the draw commands
+    // TODO: probably remove this
     for (auto& dc : DrawCommands) {
         dc.reserve(DRAW_LAYER_COUNT);
     }
@@ -37,9 +44,12 @@ camera(sbb.camera) {
 
 SpriteBatch::~SpriteBatch() {
     SDL_DestroyTexture(renderTarget);
+    SDL_DestroyRenderer(renderer);
 }
 
-void SpriteBatch::Draw() {
+void SpriteBatch::SubmitDraw() {
+
+    DEBUG_TIMER_START
 
     SDL_RenderClear(renderer);
 
@@ -64,9 +74,12 @@ void SpriteBatch::Draw() {
         }
     }
 
+
     for (int i = 0; i < NUM_DRAW_LAYERS; i++) {
         // If entity layer
+
         if ((i >= 3) && (i <= 5)) {
+            //auto start = hr_clock::now();
             if (USE_THREADING) {
                 threads[i - 3]->join();
                 delete threads[i - 3];
@@ -82,6 +95,7 @@ void SpriteBatch::Draw() {
                         });
             }
         }
+
 
         for (const auto& drawable : DrawCommands[i]) {
 
@@ -134,6 +148,8 @@ void SpriteBatch::Draw() {
         SDL_RenderCopy(renderer, renderTarget, nullptr, &r);
     }
     SDL_RenderPresent(renderer);
+
+    DEBUG_TIMER_END("Draw")
 }
 
 void SpriteBatch::Add(DrawCommand drawCommand) {

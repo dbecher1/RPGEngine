@@ -6,6 +6,7 @@
 #define RPG_MACROS_H
 
 #include <iostream>
+#include <chrono>
 #include "SDL.h"
 #include "SDL2_image/SDL_image.h"
 
@@ -23,8 +24,16 @@
 #define PIXEL_FORMAT SDL_PIXELFORMAT_ABGR8888
 
 // Other useful macros/misc
-#define ERROR_QUIT std::cerr << SDL_GetError() << std::endl; return false;
+#define ERROR_QUIT std::cerr << SDL_GetError() << std::endl; return 1;
 #define EPSILON 0.00001f
+#define FIXED_UPDATE_RATE 60.0
+#define FIXED_UPDATE_INTERVAL (1.0 / FIXED_UPDATE_RATE)
+
+#define DEBUG_TIMER_START   auto start = std::chrono::high_resolution_clock::now();
+
+#define DEBUG_TIMER_END(name)  auto end = std::chrono::high_resolution_clock::now(); \
+    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>((end - start)).count();\
+    std::cout << name << " time: " << time << " nanoseconds, or " << (static_cast<double>(time) / 1000000.0) << " milliseconds" << std::endl;
 
 // Flag to indicate if the filename will include the file extension
 // Probably will always keep this false

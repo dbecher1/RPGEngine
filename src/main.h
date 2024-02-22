@@ -8,8 +8,4 @@
 #include "SDL.h"
 #include "SDL2_image/SDL_image.h"
 
-// Function declarations
-inline bool init();
-inline void destroy();
-
 #endif //RPG_MAIN_H

@@ -111,6 +111,7 @@ SDL_Rect ResourceManager::getRectFromTextureName(const std::string &fileName) {
 bool ResourceManager::loadTextures(SDL_Renderer* renderer) {
     ImagePacker packer;
     packer.loadImages(renderer, this, TEST_PATH);
+
     return true;
 }
 
@@ -225,7 +226,7 @@ bool ResourceManager::loadEntities() {
             if (manifest.contains("IsPlayer") && (manifest["IsPlayer"]))
                 eb.is_player = true;
 
-            Entities.emplace_back(eb);
+            Entities.emplace(name, eb);
 
             std::cout << "Created new entity " << name << std::endl;
         }
@@ -242,7 +243,7 @@ bool ResourceManager::loadAnimations() {
 }
 
 // TODO: may be deleted (probably)
-std::vector<Entity> *ResourceManager::getEntities() {
+std::map<std::string, Entity> *ResourceManager::getEntities() {
     return &Entities;
 }
 
@@ -304,6 +305,14 @@ std::string ResourceManager::createLocalFileName(const std::string &name) {
     out.append(name);
     out.append(".png");
     return out;
+}
+
+SDL_Texture *ResourceManager::getAtlas() {
+    return atlas;
+}
+
+Entity *ResourceManager::getEntity(const std::string &name) {
+    return &Entities.at(name);
 }
 
 
