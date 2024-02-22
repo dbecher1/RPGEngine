@@ -8,7 +8,7 @@ Scene::Scene() {
 
 }
 
-void Scene::Update(unsigned long dt) {
+void Scene::Update(double dt) {
     for (auto &e : activeEntities) {
         e.Update(dt);
     }

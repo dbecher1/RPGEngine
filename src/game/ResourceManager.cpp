@@ -62,6 +62,7 @@ bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
                 .map_name = mapName,
             };
 
+            // this allocates on the heap, needs to be deleted at end of loop iteration
             auto dataRaw = MapLoader::loadRawMapData(p.path(), renderer);
 
             if (dataRaw == nullptr)
@@ -82,11 +83,7 @@ bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
 
                     SDL_DestroyTexture(layer.texture);
 
-                    // TODO: this is where we make the map object
-                    // FIXME: currently broken lol
-                    // TODO: make layers 3-5 draw per-tile... way harder - still have to do this
-
-                    // mapBuilder.map_layers.push_back({name_noExt, layer.layer, std::move(layer.srcRects)});
+                    // this is where we make the map object
                     mapBuilder.map_layers.push_back({name_noExt, layer.layer});
                 }
             }

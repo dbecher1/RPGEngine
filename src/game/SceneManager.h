@@ -13,7 +13,7 @@
 class SceneManager {
 
 public:
-    void Update(unsigned long dt);
+    void Update(double dt);
 
 private:
     std::stack<Scene> SceneStack;

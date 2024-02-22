@@ -11,7 +11,7 @@
 class Scene {
 public:
     Scene();
-    void Update(unsigned long dt);
+    void Update(double dt);
 
 private:
     bool isActive = true;

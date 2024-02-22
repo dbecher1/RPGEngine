@@ -4,6 +4,6 @@
 
 #include "SceneManager.h"
 
-void SceneManager::Update(unsigned long dt) {
+void SceneManager::Update(double dt) {
     SceneStack.top().Update(dt);
 }

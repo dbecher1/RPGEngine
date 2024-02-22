@@ -3,6 +3,7 @@
 #include "game/ResourceManager.h"
 #include "game/SceneManager.h"
 #include "game/SpriteBatch.h"
+#include "game/gfx/Camera.h"
 #include "tools/Timer.h"
 #include <cmath>
 
@@ -26,7 +27,12 @@ int main() {
     resourceManager = new ResourceManager();
     resourceManager->loadAllResources(renderer);
 
-    spriteBatch = new SpriteBatch(renderer, resourceManager);
+    // TODO: eventually camera will live with the scene/scene manager
+    Camera camera{renderer, INITIAL_WIDTH, INITIAL_HEIGHT};
+
+    SpriteBatchBuilder sb {renderer, resourceManager, &camera};
+
+    spriteBatch = new SpriteBatch(sb);
 
     sceneManager = new SceneManager();
 

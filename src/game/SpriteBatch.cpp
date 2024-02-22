@@ -13,8 +13,9 @@
 // TODO: Fix resize glitch where the width starts to get clipped
 // I know -where- the bug is, just haven't figured out the best way to fix it...
 
-SpriteBatch::SpriteBatch(SDL_Renderer *renderer_, ResourceManager *resourceManager_)
-: renderer(renderer_), resourceManager(resourceManager_) {
+SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
+: renderer(sbb.renderer), resourceManager(sbb.resourceManager),
+camera(sbb.camera) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     atlas = resourceManager->atlas;
     DrawCommands.fill({});
@@ -46,6 +47,8 @@ void SpriteBatch::Draw() {
         SDL_SetRenderTarget(renderer, renderTarget);
         SDL_RenderClear(renderer);
     }
+
+    camera->setCamera();
 
     std::array<std::thread*, NUM_THREADS> threads{};
     if (USE_THREADING) {
@@ -111,27 +114,19 @@ void SpriteBatch::Draw() {
             }
             if (drawable.overrideSrcRect) {
 
-                // TODO: kill me, please
-
                 SDL_Rect src = drawable.tileOverride->src;
-                // need to add the offset to get the accurate source rect in theory
+                // need to add the offset to get the accurate source rect
                 rect.x += src.x;
                 rect.y += src.y;
-                //rect.x = src.x;
-                //rect.y = src.y;
                 rect.w = src.w;
                 rect.h = src.h;
                 dest = &drawable.tileOverride->dest;
             }
-            else {
-                // SDL_RenderCopyExF(renderer, atlas, &rect, dest, 0, nullptr, SDL_FLIP_NONE);
-            }
             SDL_RenderCopyExF(renderer, atlas, &rect, dest, 0, nullptr, SDL_FLIP_NONE);
-
-            // SDL_RenderCopy(renderer, atlas, &rect, dest);
         }
         DrawCommands[i].clear();
     }
+    camera->unsetCamera();
 
     if (letterbox) {
         SDL_SetRenderTarget(renderer, nullptr);

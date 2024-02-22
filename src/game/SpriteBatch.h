@@ -8,6 +8,7 @@
 #include "SDL.h"
 #include "gfx/DrawCommand.h"
 #include "ResourceManager.h"
+#include "gfx/Camera.h"
 #include <vector>
 #include <array>
 #include <thread>
@@ -25,9 +26,16 @@
 // TODO: REVISIT DRAW LAYER COUNT!!
 #define DRAW_LAYER_COUNT 50
 
+struct SpriteBatchBuilder {
+    SDL_Renderer* renderer;
+    ResourceManager* resourceManager;
+    Camera* camera;
+};
+
 class SpriteBatch {
 public:
-    SpriteBatch(SDL_Renderer* renderer_, ResourceManager* resourceManager_);
+    SpriteBatch() = delete;
+    SpriteBatch(SpriteBatchBuilder sbb);
     ~SpriteBatch();
     void Draw();
     void Add(DrawCommand drawCommand);
@@ -40,6 +48,7 @@ private:
     float aspectRatio;
     bool letterbox{};
     int letter_offset{};
+    Camera* camera;
     SDL_Renderer* renderer;
     SDL_Texture* atlas;
     ResourceManager* resourceManager;
