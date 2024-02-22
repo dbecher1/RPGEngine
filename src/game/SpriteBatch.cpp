@@ -11,6 +11,11 @@
 #define SCALE false
 #define SCALE_FACTOR 1
 
+int counter = 0;
+double sum = 0.0;
+double min = 100.0;
+double max = 0.0;
+
 using hr_clock = std::chrono::high_resolution_clock;
 
 // TODO: Fix resize glitch where the width starts to get clipped
@@ -50,7 +55,6 @@ SpriteBatch::~SpriteBatch() {
 void SpriteBatch::SubmitDraw() {
 
     DEBUG_TIMER_START
-
     SDL_RenderClear(renderer);
 
     if (letterbox) {
@@ -74,7 +78,6 @@ void SpriteBatch::SubmitDraw() {
         }
     }
 
-
     for (int i = 0; i < NUM_DRAW_LAYERS; i++) {
         // If entity layer
 
@@ -87,20 +90,23 @@ void SpriteBatch::SubmitDraw() {
             else {
                 // Y sort
                 // TODO: play with this
+
+                /*
                 std::sort(
                         DrawCommands[i].begin(),
                         DrawCommands[i].end(),
                         [](DrawCommand& dc1, DrawCommand& dc2) -> bool {
                             return (dc1.position.y + (dc1.dimensions.y)) < (dc2.position.y + (dc2.dimensions.y));
                         });
+                        */
             }
         }
 
-
-        for (const auto& drawable : DrawCommands[i]) {
+        for (auto& drawable : DrawCommands[i]) {
 
             SDL_Rect rect;
             rect = resourceManager->getRectFromTextureName(drawable.SpriteName);
+
             SDL_FRect r, *dest = nullptr;
 
             if (!drawable.staticSprite && !drawable.overrideSrcRect) {
@@ -127,7 +133,6 @@ void SpriteBatch::SubmitDraw() {
                 dest->h *= SCALE_FACTOR;
             }
             if (drawable.overrideSrcRect) {
-
                 SDL_Rect src = drawable.tileOverride->src;
                 // need to add the offset to get the accurate source rect
                 rect.x += src.x;
@@ -136,10 +141,12 @@ void SpriteBatch::SubmitDraw() {
                 rect.h = src.h;
                 dest = &drawable.tileOverride->dest;
             }
+
             SDL_RenderCopyExF(renderer, atlas, &rect, dest, 0, nullptr, SDL_FLIP_NONE);
         }
         DrawCommands[i].clear();
     }
+
     camera->unsetCamera();
 
     if (letterbox) {
@@ -148,8 +155,25 @@ void SpriteBatch::SubmitDraw() {
         SDL_RenderCopy(renderer, renderTarget, nullptr, &r);
     }
     SDL_RenderPresent(renderer);
-
-    DEBUG_TIMER_END("Draw")
+    //DEBUG_TIMER_END("Draw")
+    DEBUG_TIMER_END_NOPRINT
+    sum += time_;
+    if (time_ < min) {
+        min = time_;
+    }
+    if (time_ > max) {
+        max = time_;
+    }
+    counter++;
+    if (counter >= 60) {
+        std::cout << "Average draw time/second: " << (sum / 60.0) << std::endl;
+        std::cout << "Fastest draw: " << min << " ms" << std::endl;
+        std::cout << "Slowest draw: " << max << " ms" << std::endl;
+        counter = 0;
+        sum = 0;
+        min = 100;
+        max = 0;
+    }
 }
 
 void SpriteBatch::Add(DrawCommand drawCommand) {

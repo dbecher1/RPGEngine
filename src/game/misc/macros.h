@@ -34,6 +34,9 @@
 #define DEBUG_TIMER_END(name)  auto end = std::chrono::high_resolution_clock::now(); \
     auto time = std::chrono::duration_cast<std::chrono::nanoseconds>((end - start)).count();\
     std::cout << name << " time: " << time << " nanoseconds, or " << (static_cast<double>(time) / 1000000.0) << " milliseconds" << std::endl;
+#define DEBUG_TIMER_END_NOPRINT  auto end = std::chrono::high_resolution_clock::now(); \
+    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>((end - start)).count();\
+    auto time_ = (static_cast<double>(time) / 1000000.0);
 
 // Flag to indicate if the filename will include the file extension
 // Probably will always keep this false
