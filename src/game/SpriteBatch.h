@@ -29,7 +29,6 @@
 struct SpriteBatchBuilder {
     SDL_Window* window;
     ResourceManager* resourceManager;
-    Camera* camera;
 };
 
 class SceneManager;

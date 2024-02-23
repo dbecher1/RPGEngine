@@ -16,8 +16,8 @@ SceneManager::SceneManager(SDL_Window* window) {
 
     camera = {spriteBatch->renderer, INITIAL_WIDTH, INITIAL_HEIGHT};
 
-    // TODO might want to... gulp... make entities a vector of...
-    // ..pointers..
+    spriteBatch->camera = &camera;
+
     SceneBuilder sceneBuilder{"demo", "demo"};
     sceneBuilder.entities.emplace_back("Character");
     Scene s{sceneBuilder, resourceManager};

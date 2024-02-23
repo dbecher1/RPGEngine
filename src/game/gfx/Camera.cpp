@@ -27,12 +27,13 @@ void Camera::Update(Vector2 position) {
 }
 
 void Camera::setCamera() {
-    // SDL_SetRenderTarget(renderer, backBuffer);
+    SDL_SetRenderTarget(renderer, backBuffer);
+    SDL_RenderClear(renderer);
 }
 
 void Camera::unsetCamera() {
-    //SDL_SetRenderTarget(renderer, nullptr);
-    //SDL_RenderCopy(renderer, backBuffer, nullptr, nullptr);
+    SDL_SetRenderTarget(renderer, nullptr);
+    SDL_RenderCopy(renderer, backBuffer, nullptr, nullptr);
 }
 
 SDL_Rect Camera::getViewport() {

@@ -3,18 +3,40 @@
 //
 
 #include "Timer.h"
+#include "../game/misc/macros.h"
+
+#if USE_SDL_TIMERS
+
+#include "SDL_timer.h"
+
+#define CURRENT_DECL Uint64 current;
+
+#define PREV_DECL Uint64 previous = SDL_GetPerformanceCounter()
+
+#define GET_TIME() (SDL_GetPerformanceCounter())
+
+#define CALCULATE_TIME(current, previous) (static_cast<double>(current - previous) / static_cast<double>(SDL_GetPerformanceFrequency()))
+
+#else
+
+#include <chrono>
+
+#define CURRENT_DECL std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> current
+
+#define PREV_DECL std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> previous = std::chrono::steady_clock::now()
+
+#define GET_TIME() (std::chrono::steady_clock::now())
+
+#define CALCULATE_TIME(current, previous) (static_cast<double>((current - previous).count() * 0.000000001))
+
+#endif
+
+CURRENT_DECL;
+PREV_DECL;
 
 void Timer::tick() {
-    if (flip) {
-        current_1 = SDL_GetPerformanceCounter();
-        dt_1 = static_cast<double>(current_1 - previous_1) / static_cast<double>(SDL_GetPerformanceFrequency());
-        previous_1 = current_1;
-    }
-    else {
-        current_2 = SDL_GetPerformanceCounter();
-        dt_2 = static_cast<double>(current_2 - previous_2) / static_cast<double>(SDL_GetPerformanceFrequency());
-        previous_2 = current_2;
-    }
-    flip = !flip;
-    dt = (dt_1 + dt_2) * 0.5;
+    current = GET_TIME();
+    dt = CALCULATE_TIME(current, previous);
+    previous = current;
+    std::cout << dt << std::endl;
 }

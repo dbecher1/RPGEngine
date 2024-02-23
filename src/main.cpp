@@ -66,9 +66,7 @@ int main() {
                 default: break;
             }
         }
-
         InputManager::Poll();
-        timer.tick();
 
         if (first_loop) {
             first_loop = false;
@@ -88,9 +86,8 @@ int main() {
                 test -= 1.0;
                 //std::cout << ++seconds << std::endl;
             }
-            sceneManager->Draw();
         }
-
+        sceneManager->Draw();
         //
         //std::this_thread::sleep_for(std::chrono::milliseconds(1));
         //SDL_Delay(1);

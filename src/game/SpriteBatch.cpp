@@ -22,8 +22,7 @@ using hr_clock = std::chrono::high_resolution_clock;
 // I know -where- the bug is, just haven't figured out the best way to fix it...
 
 SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
-: resourceManager(sbb.resourceManager),
-camera(sbb.camera) {
+: resourceManager(sbb.resourceManager) {
 
     renderer = SDL_CreateRenderer(sbb.window, -1, RENDERER_FLAGS);
 
@@ -57,10 +56,12 @@ void SpriteBatch::SubmitDraw() {
     DEBUG_TIMER_START
     SDL_RenderClear(renderer);
 
+    /*
     if (letterbox) {
         SDL_SetRenderTarget(renderer, renderTarget);
         SDL_RenderClear(renderer);
     }
+    */
 
     camera->setCamera();
 
@@ -149,12 +150,17 @@ void SpriteBatch::SubmitDraw() {
 
     camera->unsetCamera();
 
+    /*
     if (letterbox) {
         SDL_SetRenderTarget(renderer, nullptr);
         SDL_Rect r{letter_offset, 0, screenWidth, screenHeight};
         SDL_RenderCopy(renderer, renderTarget, nullptr, &r);
     }
+    */
+
     SDL_RenderPresent(renderer);
+
+    /*
     //DEBUG_TIMER_END("Draw")
     DEBUG_TIMER_END_NOPRINT
     sum += time_;
@@ -174,6 +180,7 @@ void SpriteBatch::SubmitDraw() {
         min = 100;
         max = 0;
     }
+     */
 }
 
 void SpriteBatch::Add(DrawCommand drawCommand) {
