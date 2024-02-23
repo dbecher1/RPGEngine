@@ -42,6 +42,8 @@ public:
     void SubmitDraw();
     void Add(DrawCommand drawCommand);
 
+    void Update(Vector2 position);
+
     void resetDefaultWindowSize(SDL_Window* window);
     void windowResizeEvent(int new_width, int new_height);
 private:
@@ -55,7 +57,7 @@ private:
     SDL_Texture* atlas = nullptr;
     ResourceManager* resourceManager;
     std::array<std::vector<DrawCommand>, NUM_DRAW_LAYERS> DrawCommands;
-    SDL_Texture* renderTarget;
+    SDL_Texture* renderTarget{};
 
     friend class SceneManager;
     friend class ResourceManager;

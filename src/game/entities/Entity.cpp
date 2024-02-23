@@ -72,5 +72,13 @@ void Entity::Draw(DrawCommand *dc) const {
         animationStateMachine.Draw(dc);
 }
 
+Vector2 Entity::getPosition() {
+    return position;
+}
+// Similar to getposition except takes the size into account
+Vector2 Entity::getDrawOffset() {
+    return position + (animationStateMachine.getSize() * 0.5f);
+}
+
 
 

@@ -7,56 +7,56 @@
 #include <memory>
 #include <chrono>
 
-#define USE_THREADING false
-#define SCALE false
-#define SCALE_FACTOR 1
-
-// TODO: Fix resize glitch where the width starts to get clipped
-// I know -where- the bug is, just haven't figured out the best way to fix it...
+// TODO: revisit camera + resizing
 
 SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
 : resourceManager(sbb.resourceManager) {
 
     renderer = SDL_CreateRenderer(sbb.window, -1, RENDERER_FLAGS);
+    if (renderer == nullptr) {
+        SDL_PRINT_ERR("Couldn't create renderer!");
+    }
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     // atlas = resourceManager->atlas;
     DrawCommands.fill({});
-    // Set an initial capacity of 50 objects
-    // This maths out to just under 20kb of memory reserved for the draw commands
-    // TODO: probably remove this
-    for (auto& dc : DrawCommands) {
-        dc.reserve(DRAW_LAYER_COUNT);
-    }
+
     windowWidth = INITIAL_WIDTH;
     windowHeight = INITIAL_HEIGHT;
     aspectRatio = ASPECT_RATIO;
+
+    screenWidth = windowWidth;
+    screenHeight = windowHeight;
 
     calculateResize();
 
     // create render target for possible letterboxing
     // spritebatch has ownership over this
-    renderTarget = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
+    //renderTarget = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
 
-    camera = {renderer, 10, 10};
+    camera = Camera{renderer, screenWidth, screenHeight};
+    camera.Init_BackBuffer();
 }
 
 SpriteBatch::~SpriteBatch() {
-    SDL_DestroyTexture(renderTarget);
+    //SDL_DestroyTexture(renderTarget);
     SDL_DestroyRenderer(renderer);
 }
 
 void SpriteBatch::SubmitDraw() {
 
     SDL_RenderClear(renderer);
+
     /*
     if (letterbox) {
         SDL_SetRenderTarget(renderer, renderTarget);
         SDL_RenderClear(renderer);
     }
-    */
+     */
+
     camera.setCamera();
 
+    /*
     std::array<std::thread*, NUM_THREADS> threads{};
     if (USE_THREADING) {
         for (int i = 3; i <= 5; i++) {
@@ -70,78 +70,68 @@ void SpriteBatch::SubmitDraw() {
             });
         }
     }
-
+    */
     for (int i = 0; i < NUM_DRAW_LAYERS; i++) {
         // If entity layer
-
         if ((i >= 3) && (i <= 5)) {
-            //auto start = hr_clock::now();
             if (USE_THREADING) {
+                /*
                 threads[i - 3]->join();
                 delete threads[i - 3];
+                */
             }
             else {
                 // Y sort
                 // TODO: play with this
-
-
                 std::sort(
                         DrawCommands[i].begin(),
                         DrawCommands[i].end(),
                         [](DrawCommand& dc1, DrawCommand& dc2) -> bool {
                             return (dc1.position.y + (dc1.dimensions.y)) < (dc2.position.y + (dc2.dimensions.y));
                         });
-
             }
         }
-
         for (auto& drawable : DrawCommands[i]) {
 
-            SDL_Rect rect;
-            rect = resourceManager->getRectFromTextureName(drawable.SpriteName);
+            SDL_Rect source_rect;
+            source_rect = resourceManager->getRectFromTextureName(drawable.SpriteName);
 
-            SDL_FRect r, *dest = nullptr;
+            SDL_FRect dest, *dest_ptr = nullptr;
 
             if (!drawable.staticSprite && !drawable.overrideSrcRect) {
-                r.x = drawable.position.x;
-                r.y = drawable.position.y;
+                dest.x = drawable.position.x;
+                dest.y = drawable.position.y;
                 if (drawable.useDimensions) {
-                    r.w = drawable.dimensions.x;
-                    r.h = drawable.dimensions.y;
+                    dest.w = drawable.dimensions.x;
+                    dest.h = drawable.dimensions.y;
                 }
                 else {
-                    r.w = static_cast<float>(rect.w);
-                    r.h = static_cast<float>(rect.h);
+                    dest.w = static_cast<float>(source_rect.w);
+                    dest.h = static_cast<float>(source_rect.h);
                 }
                 if (drawable.useOffset) {
-                    rect.x = rect.x + static_cast<int>(drawable.offset.x * drawable.dimensions.x);
-                    rect.y = rect.y + static_cast<int>(drawable.offset.y * drawable.dimensions.y);
-                    rect.w = static_cast<int>(drawable.dimensions.x);
-                    rect.h = static_cast<int>(drawable.dimensions.y);
+                    source_rect.x = source_rect.x + static_cast<int>(drawable.offset.x * drawable.dimensions.x);
+                    source_rect.y = source_rect.y + static_cast<int>(drawable.offset.y * drawable.dimensions.y);
+                    source_rect.w = static_cast<int>(drawable.dimensions.x);
+                    source_rect.h = static_cast<int>(drawable.dimensions.y);
                 }
-                dest = &r;
-            }
-            if (SCALE && dest) {
-                dest->w *= SCALE_FACTOR;
-                dest->h *= SCALE_FACTOR;
+                dest_ptr = &dest;
             }
             if (drawable.overrideSrcRect) {
                 SDL_Rect src = drawable.tileOverride->src;
                 // need to add the offset to get the accurate source rect
-                rect.x += src.x;
-                rect.y += src.y;
-                rect.w = src.w;
-                rect.h = src.h;
-                dest = &drawable.tileOverride->dest;
+                source_rect.x += src.x;
+                source_rect.y += src.y;
+                source_rect.w = src.w;
+                source_rect.h = src.h;
+                dest_ptr = &drawable.tileOverride->dest;
             }
 
-            SDL_RenderCopyExF(renderer, atlas, &rect, dest, 0, nullptr, SDL_FLIP_NONE);
+            SDL_RenderCopyExF(renderer, atlas, &source_rect, dest_ptr, 0, nullptr, SDL_FLIP_NONE);
         }
         DrawCommands[i].clear();
     }
-
     camera.unsetCamera();
-
     /*
     if (letterbox) {
         SDL_SetRenderTarget(renderer, nullptr);
@@ -151,6 +141,14 @@ void SpriteBatch::SubmitDraw() {
     */
 
     SDL_RenderPresent(renderer);
+}
+
+/**
+ * Exists for the purpose of updating the camera only (for now)
+ * @param position Character position
+ */
+void SpriteBatch::Update(Vector2 position) {
+    camera.Update(position);
 }
 
 void SpriteBatch::Add(DrawCommand drawCommand) {
@@ -198,3 +196,4 @@ void SpriteBatch::resetDefaultWindowSize(SDL_Window* window) {
     SDL_SetWindowSize(window, INITIAL_WIDTH, INITIAL_HEIGHT);
     windowResizeEvent(INITIAL_WIDTH, INITIAL_HEIGHT);
 }
+

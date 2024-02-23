@@ -29,6 +29,10 @@ public:
     void Update(double dt);
     void FixedUpdate();
     void Draw(DrawCommand *dc) const;
+
+    Vector2 getPosition();
+    Vector2 getDrawOffset();
+
     int getId();
     static int EID;
 protected:

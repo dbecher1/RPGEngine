@@ -13,6 +13,9 @@ sceneName(sb.name) {
     for (const auto& s : sb.entities) {
         activeEntities.push_back(rm->getEntity(s));
     }
+    for (const auto& ptr : sb.entities_by_ptr) {
+        activeEntities.push_back(ptr);
+    }
     map = rm->getMap(sb.map_name);
 }
 

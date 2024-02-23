@@ -51,3 +51,11 @@ void AnimationStateMachine::Stop() {
     is_playing = false;
     animationStates.at(currentState).Reset();
 }
+
+bool AnimationStateMachine::isPlaying() {
+    return is_playing;
+}
+
+Vector2 AnimationStateMachine::getSize() {
+    return animationStates.at(currentState).getSize();
+}

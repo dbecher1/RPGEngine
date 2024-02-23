@@ -34,9 +34,6 @@ int main() {
 
     bool quit = false;
     SDL_Event e;
-
-    double test = 0;
-    int seconds = 0;
     bool first_loop = true;
 
     do {
@@ -78,19 +75,10 @@ int main() {
         accumulator += timer.dt;
 
         while (accumulator >= FIXED_UPDATE_INTERVAL) {
-            //std::cout << accumulator << std::endl;
             sceneManager->FixedUpdate();
             accumulator -= FIXED_UPDATE_INTERVAL;
-            test += FIXED_UPDATE_INTERVAL;
-            if (test >= 1.0) {
-                test -= 1.0;
-                //std::cout << ++seconds << std::endl;
-            }
         }
         sceneManager->Draw();
-        //
-        //std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        //SDL_Delay(1);
     } while (!quit);
 
     delete sceneManager;

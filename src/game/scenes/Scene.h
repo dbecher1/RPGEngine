@@ -13,6 +13,7 @@ struct SceneBuilder {
     std::string name;
     std::string map_name;
     std::vector<std::string> entities;
+    std::vector<Entity*> entities_by_ptr;
     bool is_active;
 };
 

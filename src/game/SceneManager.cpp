@@ -15,7 +15,9 @@ SceneManager::SceneManager(SDL_Window* window) {
     spriteBatch->atlas = resourceManager->getAtlas();
 
     SceneBuilder sceneBuilder{"demo", "demo"};
-    sceneBuilder.entities.emplace_back("Character");
+    //sceneBuilder.entities.emplace_back("Character");
+    player = resourceManager->getEntity("Character");
+    sceneBuilder.entities_by_ptr.push_back(player);
     Scene s{sceneBuilder, resourceManager};
     SceneStack.push_back(s);
 }
@@ -27,6 +29,7 @@ SceneManager::~SceneManager() {
 
 void SceneManager::Update(double dt) {
     SceneStack.back().Update(dt);
+    spriteBatch->Update(player->getDrawOffset());
 }
 
 void SceneManager::Draw() {

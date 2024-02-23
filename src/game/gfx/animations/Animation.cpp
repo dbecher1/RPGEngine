@@ -33,4 +33,8 @@ void Animation::Reset() {
     accumulator = 0;
 }
 
+Vector2 Animation::getSize() {
+    return size;
+}
+
 

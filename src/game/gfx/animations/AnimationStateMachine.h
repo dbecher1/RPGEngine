@@ -23,6 +23,8 @@ public:
     // TODO this might be temporary
     void AddAnimation(const std::string& name, Animation anim);
     void AddAnimation(const std::string& name, Animation anim, int eid_);
+
+    Vector2 getSize();
 private:
     int eid = -1;
     std::string currentState;

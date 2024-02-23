@@ -27,6 +27,7 @@ private:
     std::deque<Scene> SceneStack;
     SpriteBatch* spriteBatch;
     ResourceManager* resourceManager;
+    Entity* player;
 };
 
 
