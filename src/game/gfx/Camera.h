@@ -22,9 +22,9 @@ public:
     void setCamera();
     void unsetCamera();
 
-    SDL_Rect getViewport();
+    SDL_FRect getViewport();
 private:
-    SDL_Rect viewPort;
+    SDL_FRect viewPort{};
     SDL_Texture* backBuffer;
     SDL_Renderer* renderer;
 };

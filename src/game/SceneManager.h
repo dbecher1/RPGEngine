@@ -27,7 +27,6 @@ private:
     std::deque<Scene> SceneStack;
     SpriteBatch* spriteBatch;
     ResourceManager* resourceManager;
-    Camera camera{};
 };
 
 

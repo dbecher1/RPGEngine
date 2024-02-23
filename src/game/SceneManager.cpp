@@ -14,10 +14,6 @@ SceneManager::SceneManager(SDL_Window* window) {
     resourceManager->loadAllResources(spriteBatch->renderer);
     spriteBatch->atlas = resourceManager->getAtlas();
 
-    camera = {spriteBatch->renderer, INITIAL_WIDTH, INITIAL_HEIGHT};
-
-    spriteBatch->camera = &camera;
-
     SceneBuilder sceneBuilder{"demo", "demo"};
     sceneBuilder.entities.emplace_back("Character");
     Scene s{sceneBuilder, resourceManager};

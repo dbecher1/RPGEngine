@@ -9,7 +9,7 @@
 
 #include "SDL_timer.h"
 
-#define CURRENT_DECL Uint64 current;
+#define CURRENT_DECL Uint64 current
 
 #define PREV_DECL Uint64 previous = SDL_GetPerformanceCounter()
 
@@ -38,5 +38,5 @@ void Timer::tick() {
     current = GET_TIME();
     dt = CALCULATE_TIME(current, previous);
     previous = current;
-    std::cout << dt << std::endl;
+    // std::cout << dt << std::endl;
 }

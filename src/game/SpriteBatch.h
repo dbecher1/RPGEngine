@@ -50,7 +50,7 @@ private:
     float aspectRatio;
     bool letterbox{};
     int letter_offset{};
-    Camera* camera;
+    Camera camera;
     SDL_Renderer* renderer;
     SDL_Texture* atlas = nullptr;
     ResourceManager* resourceManager;

@@ -11,13 +11,6 @@
 #define SCALE false
 #define SCALE_FACTOR 1
 
-int counter = 0;
-double sum = 0.0;
-double min = 100.0;
-double max = 0.0;
-
-using hr_clock = std::chrono::high_resolution_clock;
-
 // TODO: Fix resize glitch where the width starts to get clipped
 // I know -where- the bug is, just haven't figured out the best way to fix it...
 
@@ -44,6 +37,8 @@ SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
     // create render target for possible letterboxing
     // spritebatch has ownership over this
     renderTarget = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
+
+    camera = {renderer, 10, 10};
 }
 
 SpriteBatch::~SpriteBatch() {
@@ -53,17 +48,14 @@ SpriteBatch::~SpriteBatch() {
 
 void SpriteBatch::SubmitDraw() {
 
-    DEBUG_TIMER_START
     SDL_RenderClear(renderer);
-
     /*
     if (letterbox) {
         SDL_SetRenderTarget(renderer, renderTarget);
         SDL_RenderClear(renderer);
     }
     */
-
-    camera->setCamera();
+    camera.setCamera();
 
     std::array<std::thread*, NUM_THREADS> threads{};
     if (USE_THREADING) {
@@ -92,14 +84,14 @@ void SpriteBatch::SubmitDraw() {
                 // Y sort
                 // TODO: play with this
 
-                /*
+
                 std::sort(
                         DrawCommands[i].begin(),
                         DrawCommands[i].end(),
                         [](DrawCommand& dc1, DrawCommand& dc2) -> bool {
                             return (dc1.position.y + (dc1.dimensions.y)) < (dc2.position.y + (dc2.dimensions.y));
                         });
-                        */
+
             }
         }
 
@@ -148,7 +140,7 @@ void SpriteBatch::SubmitDraw() {
         DrawCommands[i].clear();
     }
 
-    camera->unsetCamera();
+    camera.unsetCamera();
 
     /*
     if (letterbox) {
@@ -159,28 +151,6 @@ void SpriteBatch::SubmitDraw() {
     */
 
     SDL_RenderPresent(renderer);
-
-    /*
-    //DEBUG_TIMER_END("Draw")
-    DEBUG_TIMER_END_NOPRINT
-    sum += time_;
-    if (time_ < min) {
-        min = time_;
-    }
-    if (time_ > max) {
-        max = time_;
-    }
-    counter++;
-    if (counter >= 60) {
-        std::cout << "Average draw time/second: " << (sum / 60.0) << std::endl;
-        std::cout << "Fastest draw: " << min << " ms" << std::endl;
-        std::cout << "Slowest draw: " << max << " ms" << std::endl;
-        counter = 0;
-        sum = 0;
-        min = 100;
-        max = 0;
-    }
-     */
 }
 
 void SpriteBatch::Add(DrawCommand drawCommand) {
