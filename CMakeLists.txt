@@ -53,6 +53,10 @@ add_executable(RPG
         src/tools/Tile.h
         src/game/gfx/Camera.cpp
         src/game/gfx/Camera.h
+        src/game/ui/UIManager.cpp
+        src/game/ui/UIManager.h
+        src/game/ui/UIElement.cpp
+        src/game/ui/UIElement.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

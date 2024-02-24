@@ -4,6 +4,8 @@
 
 #include "SceneManager.h"
 
+double idk = 0;
+
 SceneManager::SceneManager(SDL_Window* window) {
 
     resourceManager = new ResourceManager();
@@ -20,9 +22,12 @@ SceneManager::SceneManager(SDL_Window* window) {
     sceneBuilder.entities_by_ptr.push_back(player);
     Scene s{sceneBuilder, resourceManager};
     SceneStack.push_back(s);
+
+    uiManager = new UIManager();
 }
 
 SceneManager::~SceneManager() {
+    delete uiManager;
     delete resourceManager;
     delete spriteBatch;
 }
@@ -30,12 +35,20 @@ SceneManager::~SceneManager() {
 void SceneManager::Update(double dt) {
     SceneStack.back().Update(dt);
     spriteBatch->Update(player->getDrawOffset());
+
+    idk += dt;
+    if (idk > 1) {
+        idk = 0;
+        uiManager->ToggleState("pause");
+        uiManager->ToggleState("dialog");
+    }
 }
 
 void SceneManager::Draw() {
     for (const auto &scene : SceneStack) {
         scene.Draw(spriteBatch);
     }
+    uiManager->Draw(spriteBatch);
     spriteBatch->SubmitDraw();
 }
 

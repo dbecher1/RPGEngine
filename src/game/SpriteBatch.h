@@ -9,6 +9,7 @@
 #include "gfx/DrawCommand.h"
 #include "ResourceManager.h"
 #include "gfx/Camera.h"
+#include "ui/UIElement.h"
 #include <vector>
 #include <array>
 #include <thread>
@@ -41,12 +42,14 @@ public:
     ~SpriteBatch();
     void SubmitDraw();
     void Add(DrawCommand drawCommand);
+    void Add(UIElement* ui);
 
     void Update(Vector2 position);
 
     void resetDefaultWindowSize(SDL_Window* window);
     void windowResizeEvent(int new_width, int new_height);
 private:
+    void DrawUI(); // DELETE ME
     void calculateResize();
     int windowWidth, windowHeight, screenWidth{}, screenHeight{};
     float aspectRatio;
@@ -57,10 +60,14 @@ private:
     SDL_Texture* atlas = nullptr;
     ResourceManager* resourceManager;
     std::array<std::vector<DrawCommand>, NUM_DRAW_LAYERS> DrawCommands;
+    std::vector<UIElement*> uiDrawQueue;
     SDL_Texture* renderTarget{};
 
     friend class SceneManager;
     friend class ResourceManager;
+
+    void Convert_Rect_toScreen(SDL_FRect *r) const;
+    void GenerateCircle2(std::vector<SDL_Point> *points, int radius_, SDL_Point origin, int corner);
 };
 
 

@@ -41,7 +41,6 @@ int main() {
         timer.tick();
 
         while (SDL_PollEvent(&e) != 0) {
-            //std::cout << e.type << std::endl;
             switch (e.type) {
                 case SDL_QUIT:
                     quit = true;

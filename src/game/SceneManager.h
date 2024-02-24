@@ -7,6 +7,7 @@
 
 #include <deque>
 #include "scenes/Scene.h"
+#include "ui/UIManager.h"
 #include "ResourceManager.h"
 #include "SpriteBatch.h"
 
@@ -27,6 +28,7 @@ private:
     std::deque<Scene> SceneStack;
     SpriteBatch* spriteBatch;
     ResourceManager* resourceManager;
+    UIManager* uiManager;
     Entity* player;
 };
 
