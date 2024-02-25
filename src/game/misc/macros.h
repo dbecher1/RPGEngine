@@ -12,6 +12,8 @@
 
 // Initial window settings
 #define TITLE "Test"
+#define WINDOW_WIDTH 1080
+#define WINDOW_HEIGHT 720
 #define INITIAL_WIDTH 720
 #define INITIAL_HEIGHT 480
 #define ASPECT_RATIO 1.5

@@ -88,6 +88,8 @@ bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
                 }
             }
             mapBuilder.set_name = dataRaw->tileSetName;
+            mapBuilder.map_width = dataRaw->width;
+            mapBuilder.map_height = dataRaw->height;
             maps.emplace(mapName, mapBuilder);
 
             if (std::count(TEMP_fileNames.begin(), TEMP_fileNames.end(), dataRaw->tileSetName) == 0) {

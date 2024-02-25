@@ -20,20 +20,27 @@ SceneManager::SceneManager(SDL_Window* window) {
     //sceneBuilder.entities.emplace_back("Character");
     player = resourceManager->getEntity("Character");
     sceneBuilder.entities_by_ptr.push_back(player);
-    Scene s{sceneBuilder, resourceManager};
-    SceneStack.push_back(s);
+    OverworldScene s{sceneBuilder, resourceManager};
+    SceneStack.push_back(new OverworldScene(s));
 
     uiManager = new UIManager();
+    gameState = GlobalState::GetGlobalState();
+
+    spriteBatch->setCameraBoundaries(s.getCurrentWorldBoundaries());
 }
 
 SceneManager::~SceneManager() {
+    for (auto s : SceneStack) {
+        delete s;
+    }
     delete uiManager;
     delete resourceManager;
     delete spriteBatch;
 }
 
 void SceneManager::Update(double dt) {
-    SceneStack.back().Update(dt);
+    gameState->GameTime_Tick(dt);
+    SceneStack.back()->Update(dt);
     spriteBatch->Update(player->getDrawOffset());
 
     idk += dt;
@@ -46,9 +53,9 @@ void SceneManager::Update(double dt) {
 
 void SceneManager::Draw() {
     for (const auto &scene : SceneStack) {
-        scene.Draw(spriteBatch);
+        scene->Draw(spriteBatch);
     }
-    uiManager->Draw(spriteBatch);
+    //uiManager->Draw(spriteBatch);
     spriteBatch->SubmitDraw();
 }
 
@@ -61,6 +68,6 @@ void SceneManager::resetDefaultWindowSize(SDL_Window *window) {
 }
 
 void SceneManager::FixedUpdate() {
-    SceneStack.back().FixedUpdate();
+    SceneStack.back()->FixedUpdate();
 }
 

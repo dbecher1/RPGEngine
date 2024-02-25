@@ -10,13 +10,21 @@
 // TODO: set a "player locked" variable for pans/cutscenes etc
 // TODO: look into making viewport an int rect
 
-Camera::Camera(SDL_Renderer* renderer_, int screen_width, int screen_height) :
-renderer(renderer_), screenWidth(screen_width), screenHeight(screen_height) {
+Camera::Camera(SDL_Renderer* renderer_, SDL_Point window, SDL_Point screen) :
+renderer(renderer_), screenWidth(screen.x), screenHeight(screen.y),
+windowWidth(window.x), windowHeight(window.y) {
     viewPort = {
             0,
             0,
-            static_cast<float>(static_cast<float>(screen_width) / ZOOM),
-            static_cast<float>(static_cast<float>(screen_height) / ZOOM),
+            static_cast<float>(static_cast<float>(screen.x) / ZOOM),
+            static_cast<float>(static_cast<float>(screen.y) / ZOOM),
+    };
+
+    subRect = {
+            static_cast<float>(windowWidth) * 0.15f,
+            static_cast<float>(windowHeight) * 0.15f,
+            static_cast<float>(windowWidth) * 0.7f,
+            static_cast<float>(windowHeight) * 0.7f
     };
 }
 
@@ -39,8 +47,29 @@ Camera::~Camera() {
 void Camera::Update(Vector2 position) {
     // TODO: create sub-square where movement doesn't register
     // Also, make camera movement smoother and lag behind character ever so slightly
-    viewPort.x = static_cast<float>(std::fmax(position.x - (viewPort.w * 0.5f), 0));
-    viewPort.y = static_cast<float>(std::fmax(position.y - (viewPort.h * 0.5f), 0));
+
+    const float scroll_speed = 0.1f;
+
+    viewPort.x = (position.x - (viewPort.w * 0.5f));
+    viewPort.y = (position.y - (viewPort.h * 0.5f));
+
+    // Camera bounds
+
+    if (viewPort.x < 0)
+        viewPort.x = 0;
+    if (viewPort.y < 0)
+        viewPort.y = 0;
+
+    if (worldWidth > 0) {
+        if (viewPort.x + viewPort.w > static_cast<float>(worldWidth)) {
+            viewPort.x = static_cast<float>(worldWidth) - viewPort.w;
+        }
+    }
+    if (worldHeight > 0) {
+        if (viewPort.y + viewPort.h > static_cast<float>(worldHeight)) {
+            viewPort.y = static_cast<float>(worldHeight) - viewPort.h;
+        }
+    }
 }
 
 
@@ -63,4 +92,13 @@ SDL_FRect Camera::getViewport() {
 
 bool Camera::rectInFrame(SDL_FRect *rect) {
     return SDL_IntersectFRect(reinterpret_cast<const SDL_FRect *>(&viewPort), rect, nullptr) == SDL_TRUE;
+}
+
+void Camera::setCurrentWorldDimensions(int w, int h) {
+    worldWidth = w;
+    worldHeight = h;
+}
+
+SDL_FRect Camera::getSubRect() {
+    return subRect;
 }

@@ -2,12 +2,12 @@
 // Created by Daniel Becher on 2/7/24.
 //
 
-#include "Scene.h"
+#include "OverworldScene.h"
 #include "../ResourceManager.h"
 #include "../SpriteBatch.h"
 
-Scene::Scene(const SceneBuilder& sb, ResourceManager* rm) :
-sceneName(sb.name) {
+OverworldScene::OverworldScene(const SceneBuilder& sb, ResourceManager* rm) {
+    sceneName = sb.name;
     if (!sb.is_active)
         isActive = false;
     for (const auto& s : sb.entities) {
@@ -19,17 +19,17 @@ sceneName(sb.name) {
     map = rm->getMap(sb.map_name);
 }
 
-void Scene::Update(double dt) {
+void OverworldScene::Update(double dt) {
     for (auto &e : activeEntities) {
         e->Update(dt);
     }
 }
 
-void Scene::AddEntity(const std::string &name) {
+void OverworldScene::AddEntity(const std::string &name) {
     // TODO
 }
 
-void Scene::Draw(SpriteBatch *sb) const {
+void OverworldScene::Draw(SpriteBatch *sb) const {
     map->Draw(sb);
     for (const auto &e : activeEntities) {
         DrawCommand dc;
@@ -38,8 +38,12 @@ void Scene::Draw(SpriteBatch *sb) const {
     }
 }
 
-void Scene::FixedUpdate() {
+void OverworldScene::FixedUpdate() {
     for (auto &e : activeEntities) {
         e->FixedUpdate();
     }
+}
+
+SDL_Point OverworldScene::getCurrentWorldBoundaries() {
+    return map->getDimensions();
 }

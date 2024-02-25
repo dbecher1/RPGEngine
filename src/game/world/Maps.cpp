@@ -8,7 +8,8 @@
 Maps::Maps(MapBuilder mapBuilder) :
 mapName(mapBuilder.map_name),
 layers(std::move(mapBuilder.map_layers)),
-tileSetName(mapBuilder.set_name) {}
+tileSetName(mapBuilder.set_name),
+mapWidth(mapBuilder.map_width), mapHeight(mapBuilder.map_height) {}
 
 void Maps::Draw(SpriteBatch *sb) {
     for (auto &l : layers) {
@@ -37,4 +38,12 @@ void Maps::Dump() {
     for (const auto &l : layers) {
         std::cout << "Layer " << l.layer << ", Name: " << l.name << std::endl;
     }
+}
+
+std::string Maps::getMapName() const {
+    return mapName;
+}
+
+SDL_Point Maps::getDimensions() {
+    return {mapWidth, mapHeight};
 }

@@ -21,7 +21,8 @@ struct EnvironmentBuilder {
  */
 class Environment {
 public:
-    Environment() = delete;
+    //Environment() = delete;
+    Environment() = default;
     explicit Environment(const EnvironmentBuilder& eb);
     void Draw(DrawCommand* dc);
 private:

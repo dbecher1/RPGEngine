@@ -32,24 +32,32 @@ class SpriteBatch;
 class Camera {
 public:
     Camera() = default;
-    Camera(SDL_Renderer* renderer_, int screen_width, int screen_height);
+    Camera(SDL_Renderer* renderer_, SDL_Point window, SDL_Point screen);
     ~Camera();
 
     void Init_BackBuffer();
 
     void Update(Vector2 position);
+    void setCurrentWorldDimensions(int w, int h);
 
     void setCamera();
     void unsetCamera();
 
     bool rectInFrame(SDL_FRect* rect);
     SDL_FRect getViewport();
+    SDL_FRect getSubRect();
 private:
+    SDL_FPoint last_pos;
     SDL_FRect viewPort{};
+    SDL_FRect subRect{};
     SDL_Texture* backBuffer = nullptr;
     SDL_Renderer* renderer;
     int screenWidth;
     int screenHeight;
+    int windowWidth;
+    int windowHeight;
+    int worldWidth{};
+    int worldHeight{};
 };
 
 

@@ -12,6 +12,8 @@
 
 class SpriteBatch;
 
+class UIElement;
+
 struct UIElementBuilder {
     SDL_FRect Location{};
     std::string name;

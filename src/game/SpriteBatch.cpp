@@ -4,13 +4,14 @@
 
 #include "SpriteBatch.h"
 #include "../math/MiscMath.h"
-#include <memory>
-#include <chrono>
+#include "GlobalState.h"
 
 // TODO: revisit camera + resizing
 
 SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
 : resourceManager(sbb.resourceManager) {
+
+    auto state = GlobalState::GetGlobalState();
 
     renderer = SDL_CreateRenderer(sbb.window, -1, RENDERER_FLAGS);
     if (renderer == nullptr) {
@@ -21,12 +22,12 @@ SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
     // atlas = resourceManager->atlas;
     DrawCommands.fill({});
 
-    windowWidth = INITIAL_WIDTH;
-    windowHeight = INITIAL_HEIGHT;
+    windowWidth = state->GameWindow_CurrentWidth;
+    windowHeight = state->GameWindow_CurrentHeight;
     aspectRatio = ASPECT_RATIO;
 
-    screenWidth = windowWidth;
-    screenHeight = windowHeight;
+    screenWidth = state->GameWindow_CurrentResolution_Width;
+    screenHeight = state->GameWindow_CurrentResolution_Height;
 
     calculateResize();
 
@@ -34,7 +35,7 @@ SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
     // spritebatch has ownership over this
     //renderTarget = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
 
-    camera = Camera{renderer, screenWidth, screenHeight};
+    camera = Camera{renderer, {windowWidth, windowHeight}, {screenWidth, screenHeight}};
     camera.Init_BackBuffer();
 }
 
@@ -162,6 +163,19 @@ void SpriteBatch::SubmitDraw() {
     }
     uiDrawQueue.clear();
 
+    auto vp = camera.getViewport();
+    vp.x *= 3;
+    vp.y *= 3;
+    vp.w *= 3;
+    vp.h *= 3;
+    vp.x += vp.w * 0.15f;
+    vp.y += vp.h * 0.15f;
+    vp.w *= 0.7f;
+    vp.h *= 0.7f;
+    //SDL_RenderDrawRectF(renderer, &vp);
+
+    auto r = camera.getSubRect();
+    SDL_RenderDrawRectF(renderer, &r);
     SDL_RenderPresent(renderer);
 }
 
@@ -177,6 +191,12 @@ void SpriteBatch::Add(DrawCommand drawCommand) {
     // TODO: viewport filtering?
     DrawCommands[drawCommand.z].emplace_back(drawCommand);
 }
+
+void SpriteBatch::Add(UIElement *ui) {
+    uiDrawQueue.push_back(ui);
+}
+
+// TODO!!! Update all the resize methods with the new game state object
 
 /**
  * Called from the main loop when the window is resized
@@ -219,171 +239,10 @@ void SpriteBatch::resetDefaultWindowSize(SDL_Window* window) {
     windowResizeEvent(INITIAL_WIDTH, INITIAL_HEIGHT);
 }
 
-void SpriteBatch::Convert_Rect_toScreen(SDL_FRect* r) const {
-    r->x *= static_cast<float>(screenWidth);
-    r->y *= static_cast<float>(screenHeight);
-    r->w *= static_cast<float>(screenWidth);
-    r->h *= static_cast<float>(screenHeight);
+void SpriteBatch::setCameraBoundaries(int w, int h) {
+    camera.setCurrentWorldDimensions(w, h);
 }
 
-void SpriteBatch::DrawUI() {
-
-    // TODO: scale the curve to the size of the widget
-    // TODO: outline
-    // TODO: sub-widgets
-    // TODO: ellipse mode (width != height)
-
-    const float curve = 0.05f;
-
-    std::vector<SDL_FRect> rects;
-    std::vector<SDL_Point> points1;
-    std::vector<SDL_Point> points2;
-    std::vector<SDL_Point> points3;
-    std::vector<SDL_Point> points4;
-
-    std::vector<SDL_Point> outline_straight;
-    std::vector<SDL_Point> outline_curves;
-
-    SDL_SetRenderDrawColor(renderer, 94, 109, 218, 0xFF);
-    SDL_FRect r{0.1f, 0.1f, 0.8f, 0.8f};
-    Convert_Rect_toScreen(&r);
-
-    int radius = (int)(curve * (float)screenWidth);
-    GenerateCircle2(&points1, radius, {(int) r.x, (int) r.y}, 0);
-    GenerateCircle2(&points2, radius, {(int)r.x + (int)r.w, (int)r.y}, 1);
-    GenerateCircle2(&points3, radius, {(int) r.x, (int) r.y + (int)r.h}, 2);
-    GenerateCircle2(&points4, radius, {(int) r.x + (int)r.w, (int) r.y + (int)r.h}, 3);
-
-    SDL_FRect left_side = r;
-    left_side.x += 1;
-    left_side.w = radius;
-    left_side.y += radius;
-    left_side.h -= (radius * 2);
-
-    SDL_FRect right_side;
-    right_side.x = left_side.x + r.w - radius;
-    right_side.y = left_side.y;
-    right_side.w = left_side.w - 2;
-    right_side.h = left_side.h;
-
-    r.y += 1;
-    r.h -= 2;
-    r.x += radius;
-    r.w -= (radius * 2) - 2;
-
-    rects.push_back(r);
-    rects.push_back(left_side);
-    rects.push_back(right_side);
-
-    // OUTLINE
-    outline_straight.push_back({static_cast<int>(r.x), static_cast<int>(r.y)});
-    outline_straight.push_back({static_cast<int>(r.x + r.w), static_cast<int>(r.y)});
-    outline_straight.push_back({static_cast<int>(r.x), static_cast<int>(r.y + r.h)});
-    outline_straight.push_back({static_cast<int>(r.x + r.w), static_cast<int>(r.y + r.h)});
-    outline_straight.push_back({static_cast<int>(left_side.x), static_cast<int>(left_side.y)});
-    outline_straight.push_back({static_cast<int>(left_side.x), static_cast<int>(left_side.y + left_side.h)});
-    outline_straight.push_back({static_cast<int>(right_side.x + right_side.w), static_cast<int>(right_side.y)});
-    outline_straight.push_back({static_cast<int>(right_side.x + right_side.w), static_cast<int>(right_side.y + right_side.h)});
-
-    // hacky, but it works
-    for (const auto& p : points1) {
-        if (p.x <= static_cast<int>(r.x) && p.y <= static_cast<int>(left_side.y)) {
-            outline_curves.push_back(p);
-        }
-    }
-    for (const auto& p : points3) {
-        if (p.x <= static_cast<int>(r.x) && p.y >= static_cast<int>(left_side.y + left_side.h)) {
-            outline_curves.push_back(p);
-        }
-    }
-
-    for (const auto& p : points2) {
-        if (p.x >= static_cast<int>(right_side.x) && p.y <= static_cast<int>(right_side.y)) {
-            outline_curves.push_back(p);
-        }
-    }
-    for (const auto& p : points4) {
-        if (p.x >= static_cast<int>(right_side.x) && p.y >= static_cast<int>(right_side.y + right_side.h) ) {
-            outline_curves.push_back(p);
-        }
-    }
-
-    // Middle rect/side bars
-    SDL_RenderFillRectsF(renderer, rects.data(), (int)rects.size());
-
-    // Curved edges
-    SDL_RenderDrawLines(renderer, points1.data(), static_cast<int>(points1.size()));
-    SDL_RenderDrawLines(renderer, points2.data(), static_cast<int>(points2.size()));
-    SDL_RenderDrawLines(renderer, points3.data(), static_cast<int>(points3.size()));
-    SDL_RenderDrawLines(renderer, points4.data(), static_cast<int>(points4.size()));
-
-    // draw outlines
-    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    for (int i = 0; i < outline_straight.size() - 1; i += 2) {
-        SDL_RenderDrawLine(renderer, outline_straight[i].x, outline_straight[i].y, outline_straight[i + 1].x, outline_straight[i + 1].y);
-    }
-    SDL_RenderDrawPoints(renderer, outline_curves.data(), static_cast<int>(outline_curves.size()));
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+void SpriteBatch::setCameraBoundaries(SDL_Point p) {
+    camera.setCurrentWorldDimensions(p.x, p.y);
 }
-
-void SpriteBatch::GenerateCircle2(std::vector<SDL_Point> *points, int radius_, SDL_Point origin, int corner) {
-    int radius = radius_;
-    int x = radius - 1;
-    int y = 0;
-    int dx = 1;
-    int dy = 1;
-    int err = dx - (radius << 1);
-
-    int x_offset = radius, y_offset = radius;
-    // 0 - upper left (default)
-    // 1 - upper right
-    // 2 - lower left
-    // 3 - lower right
-    switch (corner) {
-        case 1: {
-            x_offset *= -1;
-            break;
-        }
-        case 2: {
-            y_offset *= -1;
-            break;
-        }
-        case 3: {
-            x_offset *= -1;
-            y_offset *= -1;
-            break;
-        }
-        default: break;
-    }
-    origin.x += x_offset;
-    origin.y += y_offset;
-
-    while (x >= y) {
-        points->push_back({origin.x + x, origin.y + y});
-        points->push_back({origin.x + x, origin.y - y});
-        points->push_back({origin.x + y, origin.y + x});
-        points->push_back({origin.x + y, origin.y - x});
-
-        points->push_back({origin.x - x, origin.y + y});
-        points->push_back({origin.x - x, origin.y - y});
-        points->push_back({origin.x - y, origin.y + x});
-        points->push_back({origin.x - y, origin.y - x});
-
-        if (err <= 0) {
-            y++;
-            err += dy;
-            dy += 2;
-        }
-        if (err > 0) {
-            x--;
-            dx += 2;
-            err += dx - (radius << 1);
-        }
-    }
-}
-
-void SpriteBatch::Add(UIElement *ui) {
-    uiDrawQueue.push_back(ui);
-}
-

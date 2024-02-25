@@ -35,6 +35,7 @@ namespace MapLoader {
         std::vector<RawMapLayerData> layerData;
         SDL_Texture* tileSet;
         std::string tileSetName;
+        int width, height;
     };
 
     struct Chunk {
@@ -187,9 +188,19 @@ namespace MapLoader {
         img_name = img_name.substr(0, img_name.find('.'));
 
         // Here's the magic
+        int w = -1, h = -1;
 
         for (const auto &layer : layers) {
-            SDL_Texture* layer_texture = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, layer.width * tileSet.tileWidth, layer.height * tileSet.tileHeight);
+
+            int w_ = layer.width * tileSet.tileWidth;
+            int h_ = layer.height * tileSet.tileHeight;
+
+            if (w == -1)
+                w = w_;
+            if (h == -1)
+                h = h_;
+
+            SDL_Texture* layer_texture = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, w_, h_);
             // std::vector<SDL_Rect> src_rects; // only for use in certain situations
             std::vector<Tile> tile_overrides;
 
@@ -238,7 +249,8 @@ namespace MapLoader {
             data.push_back(rmld);
         }
         SDL_SetRenderTarget(renderer, nullptr);
-        return new RawMapData{std::move(data), text, img_name};
+
+        return new RawMapData{std::move(data), text, img_name, w, h};
     }
 }
 

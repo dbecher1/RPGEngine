@@ -6,10 +6,11 @@
 #define RPG_SCENEMANAGER_H
 
 #include <deque>
-#include "scenes/Scene.h"
+#include "scenes/OverworldScene.h"
 #include "ui/UIManager.h"
 #include "ResourceManager.h"
 #include "SpriteBatch.h"
+#include "GlobalState.h"
 
 // UI goes here??
 
@@ -25,11 +26,12 @@ public:
     void windowResizeEvent(int w, int h);
     void resetDefaultWindowSize(SDL_Window* window);
 private:
-    std::deque<Scene> SceneStack;
+    std::deque<Scene*> SceneStack;
     SpriteBatch* spriteBatch;
     ResourceManager* resourceManager;
     UIManager* uiManager;
     Entity* player;
+    GlobalState* gameState;
 };
 
 

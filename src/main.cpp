@@ -1,10 +1,8 @@
 
-#include "main.h"
 #include "game/ResourceManager.h"
 #include "game/SceneManager.h"
 #include "game/gfx/Camera.h"
 #include "tools/Timer.h"
-#include <cmath>
 
 // TODO: make these a struct for neatness
 
@@ -24,7 +22,8 @@ int main() {
         ERROR_QUIT;
     }
 
-    window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, INITIAL_WIDTH, INITIAL_HEIGHT, WINDOW_FLAGS);
+    //window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, INITIAL_WIDTH, INITIAL_HEIGHT, WINDOW_FLAGS);
+    window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS);
     if (window == nullptr) {
         ERROR_QUIT;
     }

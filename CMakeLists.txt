@@ -32,7 +32,7 @@ add_executable(RPG
         src/main.cpp
         src/game/ResourceManager.cpp
         src/game/SceneManager.cpp
-        src/game/scenes/Scene.cpp
+        src/game/scenes/OverworldScene.cpp
         src/tools/ImagePacker.cpp
         src/game/gfx/Environment.cpp
         src/math/Vector2.cpp
@@ -57,6 +57,16 @@ add_executable(RPG
         src/game/ui/UIManager.h
         src/game/ui/UIElement.cpp
         src/game/ui/UIElement.h
+        src/game/GlobalState.h
+        src/game/GlobalState.cpp
+        src/game/scenes/BattleScene.cpp
+        src/game/scenes/BattleScene.h
+        src/game/battle/PartyMember.cpp
+        src/game/battle/PartyMember.h
+        src/game/battle/Enemy.cpp
+        src/game/battle/Enemy.h
+        src/game/battle/Job.h
+        src/game/scenes/Scene.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

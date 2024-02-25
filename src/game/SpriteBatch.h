@@ -24,8 +24,6 @@
 
 #define NUM_DRAW_LAYERS 10
 #define NUM_THREADS 3
-// TODO: REVISIT DRAW LAYER COUNT!!
-#define DRAW_LAYER_COUNT 50
 
 struct SpriteBatchBuilder {
     SDL_Window* window;
@@ -38,7 +36,7 @@ class ResourceManager;
 class SpriteBatch {
 public:
     SpriteBatch() = delete;
-    SpriteBatch(SpriteBatchBuilder sbb);
+    explicit SpriteBatch(SpriteBatchBuilder sbb);
     ~SpriteBatch();
     void SubmitDraw();
     void Add(DrawCommand drawCommand);
@@ -46,10 +44,12 @@ public:
 
     void Update(Vector2 position);
 
+    void setCameraBoundaries(int w, int h);
+    void setCameraBoundaries(SDL_Point p);
+
     void resetDefaultWindowSize(SDL_Window* window);
     void windowResizeEvent(int new_width, int new_height);
 private:
-    void DrawUI(); // DELETE ME
     void calculateResize();
     int windowWidth, windowHeight, screenWidth{}, screenHeight{};
     float aspectRatio;
@@ -65,9 +65,6 @@ private:
 
     friend class SceneManager;
     friend class ResourceManager;
-
-    void Convert_Rect_toScreen(SDL_FRect *r) const;
-    void GenerateCircle2(std::vector<SDL_Point> *points, int radius_, SDL_Point origin, int corner);
 };
 
 
