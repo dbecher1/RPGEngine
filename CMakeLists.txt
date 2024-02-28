@@ -57,16 +57,19 @@ add_executable(RPG
         src/game/ui/UIManager.h
         src/game/ui/UIElement.cpp
         src/game/ui/UIElement.h
-        src/game/GlobalState.h
-        src/game/GlobalState.cpp
-        src/game/scenes/BattleScene.cpp
-        src/game/scenes/BattleScene.h
-        src/game/battle/PartyMember.cpp
-        src/game/battle/PartyMember.h
-        src/game/battle/Enemy.cpp
-        src/game/battle/Enemy.h
+        src/game/state/GlobalState.h
+        src/game/state/GlobalState.cpp
         src/game/battle/Job.h
         src/game/scenes/Scene.h
+        src/game/entities/GlobalEntity.cpp
+        src/game/entities/GlobalEntity.h
+        src/game/entities/IBaseEntity.h
+        src/game/entities/BattleEntity.cpp
+        src/game/entities/BattleEntity.h
+        src/game/entities/OverworldEntity.cpp
+        src/game/entities/OverworldEntity.h
+        src/game/battle/ElementalAffinity.h
+        src/game/battle/Attributes.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

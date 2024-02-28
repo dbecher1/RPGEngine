@@ -22,14 +22,14 @@ void Entity::Update(double dt) {
     // other things here
     delta = {0.0f, 0.0f};
     if (isPlayer) {
-        InputState inputState = *InputManager::GetState();
-        if (inputState.Up)
+        auto [Up, Down, Left, Right, Action, Pause] = *InputManager::GetState();
+        if (Up)
             delta.y += -1;
-        if (inputState.Down)
+        if (Down)
             delta.y += 1;
-        if (inputState.Left)
+        if (Left)
             delta.x += -1;
-        if (inputState.Right)
+        if (Right)
             delta.x += 1;
     }
     // TODO: make this state machine more robust

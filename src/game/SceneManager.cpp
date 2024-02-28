@@ -24,7 +24,7 @@ SceneManager::SceneManager(SDL_Window* window) {
     SceneStack.push_back(new OverworldScene(s));
 
     uiManager = new UIManager();
-    gameState = GlobalState::GetGlobalState();
+    // gameState = GlobalState::GetGlobalState();
 
     spriteBatch->setCameraBoundaries(s.getCurrentWorldBoundaries());
 }
@@ -39,7 +39,7 @@ SceneManager::~SceneManager() {
 }
 
 void SceneManager::Update(double dt) {
-    gameState->GameTime_Tick(dt);
+    GlobalState::GameTime_Tick(dt);
     SceneStack.back()->Update(dt);
     spriteBatch->Update(player->getDrawOffset());
 

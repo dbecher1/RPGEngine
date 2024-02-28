@@ -146,6 +146,10 @@ bool ResourceManager::loadEntities() {
     // TODO: might want to -actually- put animation loading in its own function
 
     for (const auto& file : iter_dir(ENTITY_PATH)) {
+
+        // Downsides to macosx development lol
+        if (file.path().filename().string()[0] == '.') continue;
+
         std::ifstream istream(file);
         json manifest = json::parse(istream);
         istream.close();

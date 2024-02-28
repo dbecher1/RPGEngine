@@ -4,11 +4,16 @@
 
 #include "GlobalState.h"
 
-static GlobalState state{};
+double GlobalState::GameTime_Accumulator = 0;
+Uint8 GlobalState::GameTime_Seconds = 0;
+Uint8 GlobalState::GameTime_Minutes = 0;
+Uint64 GlobalState::GameTime_Hours = 0;
 
-GlobalState *GlobalState::GetGlobalState() {
-    return &state;
-}
+Uint32 GlobalState::GameWindow_CurrentWidth = WINDOW_WIDTH;
+Uint32 GlobalState::GameWindow_CurrentHeight = WINDOW_HEIGHT;
+bool GlobalState::GameWindow_FullScreen = false;
+Uint32 GlobalState::GameWindow_CurrentResolution_Width = INITIAL_WIDTH;
+Uint32 GlobalState::GameWindow_CurrentResolution_Height = INITIAL_HEIGHT;
 
 void GlobalState::GameTime_Tick(double dt) {
     GameTime_Accumulator += dt;

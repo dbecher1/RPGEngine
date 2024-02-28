@@ -3,7 +3,7 @@
 //
 
 #include "UIElement.h"
-#include "../GlobalState.h"
+#include "../state/GlobalState.h"
 
 // TODO: separate width/height radii
 // TODO: adjust for when curve = 0
@@ -12,10 +12,10 @@ UIElement::UIElement(const UIElementBuilder& builder) :
 elementColor(builder.color), outlineColor(builder.outline_color),
 is_active(builder.is_active), name(builder.name) {
 
-    auto state = GlobalState::GetGlobalState();
+    // auto state = GlobalState::GetGlobalState();
 
     SDL_Rect r = convertRectToScreen(builder.Location);
-    int radius = static_cast<int>(builder.curve * state->GameWindow_CurrentWidth);
+    int radius = static_cast<int>(builder.curve * GlobalState::GameWindow_CurrentWidth);
 
     for (int i = 0; i < 4; i++) {
         int x_ = r.x + ((i % 2) * r.w);
@@ -77,11 +77,10 @@ is_active(builder.is_active), name(builder.name) {
 }
 
 SDL_Rect UIElement::convertRectToScreen(SDL_FRect r) {
-    auto state = GlobalState::GetGlobalState();
-    return { static_cast<int>(r.x * state->GameWindow_CurrentWidth),
-             static_cast<int>(r.y * state->GameWindow_CurrentHeight),
-             static_cast<int>(r.w * state->GameWindow_CurrentWidth),
-             static_cast<int>(r.h * state->GameWindow_CurrentHeight)};
+    return { static_cast<int>(r.x * GlobalState::GameWindow_CurrentWidth),
+             static_cast<int>(r.y * GlobalState::GameWindow_CurrentHeight),
+             static_cast<int>(r.w * GlobalState::GameWindow_CurrentWidth),
+             static_cast<int>(r.h * GlobalState::GameWindow_CurrentHeight)};
 }
 
 void UIElement::GenerateCircle(std::vector<SDL_Point> *points, int radius, SDL_Point origin, int corner) {

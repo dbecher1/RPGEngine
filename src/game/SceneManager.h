@@ -10,7 +10,7 @@
 #include "ui/UIManager.h"
 #include "ResourceManager.h"
 #include "SpriteBatch.h"
-#include "GlobalState.h"
+#include "state/GlobalState.h"
 
 // UI goes here??
 
@@ -31,7 +31,6 @@ private:
     ResourceManager* resourceManager;
     UIManager* uiManager;
     Entity* player;
-    GlobalState* gameState;
 };
 
 

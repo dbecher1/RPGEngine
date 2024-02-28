@@ -4,14 +4,14 @@
 
 #include "SpriteBatch.h"
 #include "../math/MiscMath.h"
-#include "GlobalState.h"
+#include "state/GlobalState.h"
 
 // TODO: revisit camera + resizing
 
 SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
 : resourceManager(sbb.resourceManager) {
 
-    auto state = GlobalState::GetGlobalState();
+    //auto state = GlobalState::GetGlobalState();
 
     renderer = SDL_CreateRenderer(sbb.window, -1, RENDERER_FLAGS);
     if (renderer == nullptr) {
@@ -22,12 +22,12 @@ SpriteBatch::SpriteBatch(SpriteBatchBuilder sbb)
     // atlas = resourceManager->atlas;
     DrawCommands.fill({});
 
-    windowWidth = state->GameWindow_CurrentWidth;
-    windowHeight = state->GameWindow_CurrentHeight;
+    windowWidth = GlobalState::GameWindow_CurrentWidth;
+    windowHeight = GlobalState::GameWindow_CurrentHeight;
     aspectRatio = ASPECT_RATIO;
 
-    screenWidth = state->GameWindow_CurrentResolution_Width;
-    screenHeight = state->GameWindow_CurrentResolution_Height;
+    screenWidth = GlobalState::GameWindow_CurrentResolution_Width;
+    screenHeight = GlobalState::GameWindow_CurrentResolution_Height;
 
     calculateResize();
 
