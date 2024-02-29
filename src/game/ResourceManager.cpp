@@ -6,6 +6,7 @@
 #include "../tools/extern/json.hpp"
 #include "../tools/MapLoader.hpp"
 #include "world/Maps.h"
+#include "EntityManager.h"
 
 #include <iostream>
 #include <filesystem>
@@ -153,88 +154,93 @@ bool ResourceManager::loadEntities() {
         std::ifstream istream(file);
         json manifest = json::parse(istream);
         istream.close();
-
         std::string name = manifest["Name"];
         bool isAnimated = manifest["IsAnimated"];
         float moveSpeed = manifest["MoveSpeed"];
         int z = manifest["Z"];
 
         if (isAnimated) {
-            std::string subDir(ANIMATION_PATH);
-            subDir.append(manifest["Directory"]);
 
-            std::vector<std::string> animationNames;
-            for (auto& s : manifest["Animations"]) {
-                animationNames.push_back(s);
+            if (manifest.contains("Contains_Anim_Data") && manifest["Contains_Anim_Data"]) {
+
             }
-            AnimationStateMachine stateMachine;
+            else {
+                std::string subDir(ANIMATION_PATH);
+                subDir.append(manifest["Directory"]);
+                std::vector<std::string> animationNames;
+                for (auto& s : manifest["Animations"]) {
+                    animationNames.push_back(s);
+                }
+                AnimationStateMachine stateMachine;
 
-            // TODO: rename file2 and other such variables to be clearer
-            int eid = -1;
+                int eid = -1;
 
-            for (const auto& animation_file : iter_dir(ANIMATION_PATH)) {
-                if (animation_file.is_regular_file()) {
+                for (const auto& animation_file : iter_dir(ANIMATION_PATH)) {
+                    if (animation_file.is_regular_file()) {
 
-                    // chop off the extension
-                    std::string animation_fileName = animation_file.path().filename().string();
-                    animation_fileName = animation_fileName.substr(0, animation_fileName.find('.'));
+                        // chop off the extension
+                        std::string animation_fileName = animation_file.path().filename().string();
+                        animation_fileName = animation_fileName.substr(0, animation_fileName.find('.'));
 
-                    if (std::count(animationNames.begin(), animationNames.end(), animation_fileName) == 0)
-                        continue;
+                        if (std::count(animationNames.begin(), animationNames.end(), animation_fileName) == 0)
+                            continue;
 
-                    std::ifstream animation_istream(animation_file);
-                    json animation_manifest = json::parse(animation_istream);
-                    animation_istream.close();
+                        std::ifstream animation_istream(animation_file);
+                        json animation_manifest = json::parse(animation_istream);
+                        animation_istream.close();
 
-                    int framesX = animation_manifest["FramesX"];
-                    int framesY = animation_manifest["FramesY"];
-                    double speed = animation_manifest["Speed"];
+                        int framesX = animation_manifest["FramesX"];
+                        int framesY = animation_manifest["FramesY"];
+                        double speed = animation_manifest["Speed"];
 
-                    auto rect = textureRects[animation_fileName];
+                        auto rect = textureRects[animation_fileName];
 
-                    // animations will either be singular or plural
-                    // If plural, it will contain the field "NumAnimations"
-                    if (animation_manifest.contains("NumAnimations")) {
-                        int numAnimations = animation_manifest["NumAnimations"];
-                        int rowHeight = static_cast<int>(rect.h / numAnimations);
-                        SDL_Rect subRect{rect.x, rect.y, rect.w, rowHeight};
+                        // animations will either be singular or plural
+                        // If plural, it will contain the field "NumAnimations"
+                        if (animation_manifest.contains("NumAnimations")) {
+                            int numAnimations = animation_manifest["NumAnimations"];
+                            int rowHeight = static_cast<int>(rect.h / numAnimations);
+                            SDL_Rect subRect{rect.x, rect.y, rect.w, rowHeight};
 
-                        // Have to create sub rects and store them in the map before creating animation
-                        for (int i = 0; i < numAnimations; i++) {
-                            SDL_Rect newSrc = {subRect.x,
-                                               subRect.y + (rowHeight * i),
-                                               rect.w,
-                                               rowHeight};
-                            std::string newSrcName = animation_manifest["Names"][i];
-                            eid = Entity::EID; // the next entity to be created will have this value
-                            stateMachine.AddAnimation(newSrcName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rowHeight)}}, eid);
-                            newSrcName.append(std::to_string(eid));
-                            //textureRects[newSrcName] = newSrc;
-                            textureRects.emplace(newSrcName, newSrc);
+                            // Have to create sub rects and store them in the map before creating animation
+                            for (int i = 0; i < numAnimations; i++) {
+                                SDL_Rect newSrc = {subRect.x,
+                                                   subRect.y + (rowHeight * i),
+                                                   rect.w,
+                                                   rowHeight};
+                                std::string newSrcName = animation_manifest["Names"][i];
+                                eid = Entity::EID; // the next entity to be created will have this value
+                                stateMachine.AddAnimation(newSrcName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rowHeight)}}, eid);
+                                newSrcName.append(std::to_string(eid));
+                                //textureRects[newSrcName] = newSrc;
+                                textureRects.emplace(newSrcName, newSrc);
 
+                            }
+                        }
+                        else {
+                            stateMachine.AddAnimation(animation_fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
                         }
                     }
-                    else {
-                        stateMachine.AddAnimation(animation_fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
-                    }
                 }
+                EntityBuilder eb {
+                    .name = name,
+                    .animationStateMachine = stateMachine,
+                    .move_speed = moveSpeed,
+                    .animated = true,
+                    .z = z,
+                };
+                if (manifest.contains("DefaultState"))
+                    eb.defaultAnim = std::optional<std::string>(manifest["DefaultState"]);
+
+                if (manifest.contains("IsPlayer") && (manifest["IsPlayer"]))
+                    eb.is_player = true;
+
+                Entities.emplace(name, eb);
+
+                std::cout << "Created new entity " << name << std::endl;
             }
-            EntityBuilder eb {
-                .name = name,
-                .animationStateMachine = stateMachine,
-                .move_speed = moveSpeed,
-                .animated = true,
-                .z = z,
-            };
-            if (manifest.contains("DefaultState"))
-                eb.defaultAnim = std::optional<std::string>(manifest["DefaultState"]);
 
-            if (manifest.contains("IsPlayer") && (manifest["IsPlayer"]))
-                eb.is_player = true;
 
-            Entities.emplace(name, eb);
-
-            std::cout << "Created new entity " << name << std::endl;
         }
         else {
             // TODO: non-animated entities?
