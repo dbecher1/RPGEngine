@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Entity",
+  "description": "Data read at load-time describing an entity in the game.",
+  "type": "object",
+  "properties": {
+    "Name": {
+      "description": "The character's identifying name",
+      "type": "string"
+    },
+    "Element": {
+      "description": "The character's elemental affinity.",
+      "type": "string"
+    },
+    "Attributes": {
+      "description": "TODO",
+      "type": "null"
+    },
+    "Overworld": {
+      "description": "The information for the entity's overworld representation.",
+      "type": "object",
+      "items": {
+        "Directory": {
+          "description": "The subdirectory where the entity's image data and metadata are stored.",
+          "type": "string"
+        },
+        "Animations": {
+          "description": "The animation states for the overworld entity.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "MoveSpeed": {
+          "description": "The speed the entity moves at in the overworld. May revisit this.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "IsPlayer": {
+          "description": "Flag if this is the player or not. WILL DELETE THIS.",
+          "type": "boolean"
+        },
+        "Z": {
+          "description": "The Z layer, 3-5 to draw this entity on. Will be 3 in most cases.",
+          "type": "integer",
+          "inclusiveMinimum": 3,
+          "inclusiveMaximum": 5
+        }
+      },
+      "required": ["Directory", "Animations", "MoveSpeed", "Z"]
+    },
+    "Battle": {
+      "description": "The information for the entity's  battle representation.",
+      "type": "object",
+      "items": {
+        "Directory": {
+          "description": "The subdirectory where the entity's image data and metadata are stored.",
+          "type": "string"
+        },
+        "Animations": {
+          "description": "The animation states for the entity's battle state. TODO: make this exclusive",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": ["Directory", "Animations"]
+    }
+  },
+  "required": ["Name", "Overworld"]
+}
