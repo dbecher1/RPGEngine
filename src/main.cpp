@@ -1,4 +1,5 @@
 
+#include "game/InputManager.h"
 #include "game/ResourceManager.h"
 #include "game/SceneManager.h"
 #include "game/gfx/Camera.h"

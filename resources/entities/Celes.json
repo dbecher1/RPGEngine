@@ -1,0 +1,47 @@
+{
+  "Name": "Celes",
+  "Element": "Light",
+  "Attributes": null,
+  "IsPlayer": true,
+  "Directory": "Celes",
+  "Overworld": {
+    "Animations": [
+      {
+        "Name": "WalkDown",
+        "FramesX": 4,
+        "FramesY": 1,
+        "Speed": 150
+      },
+      {
+        "Name": "WalkUp",
+        "FramesX": 4,
+        "FramesY": 1,
+        "Speed": 150
+      },
+      {
+         "Name": "WalkLeft",
+        "FramesX": 4,
+        "FramesY": 1,
+        "Speed": 150
+      },
+      {
+        "Name": "WalkRight",
+        "FramesX": 4,
+        "FramesY": 1,
+        "Speed": 150
+      }
+    ],
+    "MoveSpeed": 75,
+    "Z": 3
+  },
+  "Battle": {
+    "Animations": [
+      {
+        "Name": "Idle",
+        "FramesX": 1,
+        "FramesY": 1,
+        "Speed": 200
+      }
+    ]
+  }
+}

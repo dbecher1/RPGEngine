@@ -12,6 +12,8 @@
 #include <filesystem>
 #include <fstream>
 
+#include "battle/ElementalAffinity.h"
+
 /// TODO: probably set an upper limit on texture packing and create a way for a multi-level hierarchy of images
 // TODO: Create an Entity manifest, create AnimationStateMachine loader from this
 
@@ -118,30 +120,6 @@ bool ResourceManager::loadTextures(SDL_Renderer* renderer) {
     return true;
 }
 
-AnimationStateMachine ResourceManager::asmLoader() {
-    std::cerr << "Using asmLoader method! For debugging only, ye been warned..." << std::endl;
-    AnimationStateMachine stateMachine;
-    for (const auto& file : iter_dir(ANIMATION_PATH)) {
-        if (file.is_regular_file()) {
-            std::ifstream istream(file);
-            json manifest = json::parse(istream);
-            istream.close();
-
-            int framesX = manifest.at("FramesX");
-            int framesY = manifest.at("FramesY");
-            double speed = manifest.at("Speed");
-
-            // chop off the extension
-            std::string fileName = file.path().filename().string();
-            fileName = fileName.substr(0, fileName.find('.'));
-
-            auto rect = textureRects.at(fileName);
-            stateMachine.AddAnimation(fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
-        }
-    }
-    return stateMachine;
-}
-
 bool ResourceManager::loadEntities() {
 
     // TODO: might want to -actually- put animation loading in its own function
@@ -154,97 +132,58 @@ bool ResourceManager::loadEntities() {
         std::ifstream istream(file);
         json manifest = json::parse(istream);
         istream.close();
-        std::string name = manifest["Name"];
-        bool isAnimated = manifest["IsAnimated"];
-        float moveSpeed = manifest["MoveSpeed"];
-        int z = manifest["Z"];
 
-        if (isAnimated) {
+        std::string name, affinity_;
 
-            if (manifest.contains("Contains_Anim_Data") && manifest["Contains_Anim_Data"]) {
+        try {
+            float moveSpeed;
+            int z;
+            name = manifest["Name"];
+            affinity_ = manifest["Element"];
+            //ElementalAffinity affinity = getTypeFromString(affinity_.c_str());
+            // TODO: Attributes
 
-            }
-            else {
-                std::string subDir(ANIMATION_PATH);
-                subDir.append(manifest["Directory"]);
-                std::vector<std::string> animationNames;
-                for (auto& s : manifest["Animations"]) {
-                    animationNames.push_back(s);
-                }
-                AnimationStateMachine stateMachine;
+            moveSpeed = manifest["Overworld"]["MoveSpeed"];
+            z = manifest["Overworld"]["Z"];
+            std::string dir = manifest["Directory"];
 
-                int eid = -1;
+            AnimationStateMachine overworld(dir), battle(dir);
 
-                for (const auto& animation_file : iter_dir(ANIMATION_PATH)) {
-                    if (animation_file.is_regular_file()) {
-
-                        // chop off the extension
-                        std::string animation_fileName = animation_file.path().filename().string();
-                        animation_fileName = animation_fileName.substr(0, animation_fileName.find('.'));
-
-                        if (std::count(animationNames.begin(), animationNames.end(), animation_fileName) == 0)
-                            continue;
-
-                        std::ifstream animation_istream(animation_file);
-                        json animation_manifest = json::parse(animation_istream);
-                        animation_istream.close();
-
-                        int framesX = animation_manifest["FramesX"];
-                        int framesY = animation_manifest["FramesY"];
-                        double speed = animation_manifest["Speed"];
-
-                        auto rect = textureRects[animation_fileName];
-
-                        // animations will either be singular or plural
-                        // If plural, it will contain the field "NumAnimations"
-                        if (animation_manifest.contains("NumAnimations")) {
-                            int numAnimations = animation_manifest["NumAnimations"];
-                            int rowHeight = static_cast<int>(rect.h / numAnimations);
-                            SDL_Rect subRect{rect.x, rect.y, rect.w, rowHeight};
-
-                            // Have to create sub rects and store them in the map before creating animation
-                            for (int i = 0; i < numAnimations; i++) {
-                                SDL_Rect newSrc = {subRect.x,
-                                                   subRect.y + (rowHeight * i),
-                                                   rect.w,
-                                                   rowHeight};
-                                std::string newSrcName = animation_manifest["Names"][i];
-                                eid = Entity::EID; // the next entity to be created will have this value
-                                stateMachine.AddAnimation(newSrcName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rowHeight)}}, eid);
-                                newSrcName.append(std::to_string(eid));
-                                //textureRects[newSrcName] = newSrc;
-                                textureRects.emplace(newSrcName, newSrc);
-
-                            }
-                        }
-                        else {
-                            stateMachine.AddAnimation(animation_fileName, {framesX, framesY, speed, {static_cast<float>(rect.w), static_cast<float>(rect.h)}});
-                        }
-                    }
-                }
-                EntityBuilder eb {
-                    .name = name,
-                    .animationStateMachine = stateMachine,
-                    .move_speed = moveSpeed,
-                    .animated = true,
-                    .z = z,
-                };
-                if (manifest.contains("DefaultState"))
-                    eb.defaultAnim = std::optional<std::string>(manifest["DefaultState"]);
-
-                if (manifest.contains("IsPlayer") && (manifest["IsPlayer"]))
-                    eb.is_player = true;
-
-                Entities.emplace(name, eb);
-
-                std::cout << "Created new entity " << name << std::endl;
+            for (auto& anim : manifest["Overworld"]["Animations"]) {
+                std::string anim_name = anim["Name"];
+                // The texture rect is stored with the identifier, so we need to reconstruct that
+                std::string rect_name = anim_name;
+                rect_name.append("_").append(dir);
+                auto [_, _a, w, h] = textureRects[rect_name];
+                int framesX = anim["FramesX"];
+                int framesY = anim["FramesY"];
+                double speed = anim["Speed"];
+                overworld.AddAnimation(anim_name, Animation{framesX, framesY, speed, {static_cast<float>(w), static_cast<float>(h)}});
             }
 
+            for (auto& anim : manifest["Battle"]["Animations"]) {
+                std::string fn = anim["Name"];
+                //fn.append(dir);
+                auto [_, _a, w, h] = textureRects[fn];
+                int fx = anim["FramesX"];
+                int fy = anim["FramesY"];
+                double fs = anim["Speed"];
+                battle.AddAnimation(fn, Animation{fx, fy, fs, {static_cast<float>(w), static_cast<float>(h)}});
+            }
 
+            EntityBuilder eb{
+                name, moveSpeed, true, z, true, overworld, battle};
+            if (manifest.contains("IsPlayer") && manifest["IsPlayer"]) {
+                eb.is_player = true;
+            }
+            //Entities[name] = GlobalEntity(eb);
+            Entities.emplace(name, eb);
+        } catch (json::type_error &e) {
+            std::cerr << e.what() << std::endl;
+        } catch (json::parse_error &e) {
+            std::cerr << e.what() << std::endl;
         }
-        else {
-            // TODO: non-animated entities?
-        }
+
     }
     return true;
 }
@@ -255,7 +194,7 @@ bool ResourceManager::loadAnimations() {
 }
 
 // TODO: may be deleted (probably)
-std::map<std::string, Entity> *ResourceManager::getEntities() {
+std::map<std::string, GlobalEntity> *ResourceManager::getEntities() {
     return &Entities;
 }
 
@@ -323,7 +262,7 @@ SDL_Texture *ResourceManager::getAtlas() {
     return atlas;
 }
 
-Entity *ResourceManager::getEntity(const std::string &name) {
+GlobalEntity *ResourceManager::getEntity(const std::string &name) {
     return &Entities.at(name);
 }
 

@@ -16,14 +16,14 @@
       "description": "TODO",
       "type": "null"
     },
+    "Directory": {
+      "description": "The subdirectory where the entity's image data and metadata are stored.",
+      "type": "string"
+    },
     "Overworld": {
       "description": "The information for the entity's overworld representation.",
       "type": "object",
       "items": {
-        "Directory": {
-          "description": "The subdirectory where the entity's image data and metadata are stored.",
-          "type": "string"
-        },
         "Animations": {
           "description": "The animation states for the overworld entity.",
           "type": "array",
@@ -49,16 +49,12 @@
           "inclusiveMaximum": 5
         }
       },
-      "required": ["Directory", "Animations", "MoveSpeed", "Z"]
+      "required": ["Animations", "MoveSpeed", "Z"]
     },
     "Battle": {
-      "description": "The information for the entity's  battle representation.",
+      "description": "The information for the entity's battle representation.",
       "type": "object",
       "items": {
-        "Directory": {
-          "description": "The subdirectory where the entity's image data and metadata are stored.",
-          "type": "string"
-        },
         "Animations": {
           "description": "The animation states for the entity's battle state. TODO: make this exclusive",
           "type": "array",
@@ -69,8 +65,8 @@
           "uniqueItems": true
         }
       },
-      "required": ["Directory", "Animations"]
+      "required": ["Animations"]
     }
   },
-  "required": ["Name", "Overworld"]
+  "required": ["Name", "Overworld", "Directory"]
 }

@@ -19,25 +19,25 @@ struct EntityBuilder {
     float overworld_move_speed;
     bool animated = true;
     int z;
-    std::optional<std::string> defaultAnim{};
-    bool is_player = false;
-    ElementalAffinity affinity;
-    Attributes stats;
+    bool is_active;
     AnimationStateMachine overworldAnimations;
     AnimationStateMachine battleAnimations;
+    ElementalAffinity affinity;
+    Attributes stats;
+    bool is_player = false;
 };
 
 class GlobalEntity : public IBaseEntity {
 public:
-    GlobalEntity() = delete;
+    //GlobalEntity() = default;
     explicit GlobalEntity(const EntityBuilder& eb);
     void Update(double dt) override;
-    void Draw(DrawCommand *dc) override;;
+    void Draw(DrawCommand *dc) override;
+    void FixedUpdate() override;
 private:
     std::string EntityName;
     ElementalAffinity Affinity;
     Attributes Stats;
-    bool IsActive;
     // TODO: abilities and status
     BattleEntity BattleEntity;
     OverworldEntity OverworldEntity;

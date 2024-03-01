@@ -9,8 +9,7 @@
 #include "scenes/OverworldScene.h"
 #include "ui/UIManager.h"
 #include "ResourceManager.h"
-#include "SpriteBatch.h"
-#include "state/GlobalState.h"
+#include "events/EventPoller.h"
 
 // UI goes here??
 
@@ -26,11 +25,13 @@ public:
     void windowResizeEvent(int w, int h);
     void resetDefaultWindowSize(SDL_Window* window);
 private:
+    EventPoller eventPoller{};
+    RPG::Event e;
     std::deque<Scene*> SceneStack;
     SpriteBatch* spriteBatch;
     ResourceManager* resourceManager;
     UIManager* uiManager;
-    Entity* player;
+    GlobalEntity* player;
 };
 
 

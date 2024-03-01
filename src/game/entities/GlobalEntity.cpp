@@ -7,13 +7,19 @@
 
 GlobalEntity::GlobalEntity(const EntityBuilder& eb) :
 EntityName(eb.name), Affinity(eb.affinity),
-Stats(eb.stats), IsActive(true),
-BattleEntity(eb), OverworldEntity(eb) {}
+Stats(eb.stats),
+BattleEntity(eb), OverworldEntity(eb) {
+    active = eb.is_active;
+}
 
 void GlobalEntity::Update(double dt) {
-
+    OverworldEntity.Update(dt);
 }
 
 void GlobalEntity::Draw(DrawCommand *dc) {
+    OverworldEntity.Draw(dc);
 }
 
+void GlobalEntity::FixedUpdate() {
+    OverworldEntity.FixedUpdate();
+}

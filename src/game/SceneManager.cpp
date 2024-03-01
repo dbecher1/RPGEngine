@@ -3,6 +3,7 @@
 //
 
 #include "SceneManager.h"
+#include "state/GlobalState.h"
 
 double idk = 0;
 
@@ -18,7 +19,7 @@ SceneManager::SceneManager(SDL_Window* window) {
 
     SceneBuilder sceneBuilder{"demo", "demo"};
     //sceneBuilder.entities.emplace_back("Character");
-    player = resourceManager->getEntity("Character");
+    player = resourceManager->getEntity("Celes");
     sceneBuilder.entities_by_ptr.push_back(player);
     OverworldScene s{sceneBuilder, resourceManager};
     SceneStack.push_back(new OverworldScene(s));
@@ -39,9 +40,20 @@ SceneManager::~SceneManager() {
 }
 
 void SceneManager::Update(double dt) {
+
+    while (eventPoller.Poll(&e)) {
+        switch (e.type) {
+            default: break;
+            case RPG::BATTLE_START: {
+                // SceneStack.push_back({});
+                break;
+            }
+        }
+    }
+
     GlobalState::GameTime_Tick(dt);
     SceneStack.back()->Update(dt);
-    spriteBatch->Update(player->getDrawOffset());
+    // spriteBatch->Update(player->getDrawOffset()); // TODO
 
     idk += dt;
     if (idk > 1) {

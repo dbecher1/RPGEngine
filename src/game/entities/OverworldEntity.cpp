@@ -63,7 +63,7 @@ void OverworldEntity::FixedUpdate() {
     position += delta * moveSpeed * FIXED_UPDATE_INTERVAL;
 }
 
-Vector2 OverworldEntity::getPosition() {
+Vector2 OverworldEntity::getPosition() const {
     return position;
 }
 

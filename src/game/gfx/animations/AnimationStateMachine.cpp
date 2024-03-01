@@ -4,6 +4,9 @@
 
 #include "AnimationStateMachine.h"
 #include <iostream>
+#include <utility>
+
+AnimationStateMachine::AnimationStateMachine(std::string  name) : name(std::move(name)){}
 
 void AnimationStateMachine::Draw(DrawCommand *dc) const {
     dc->SpriteName = currentState.c_str();
@@ -19,28 +22,21 @@ void AnimationStateMachine::SetState(const std::string &state_) {
     if (!is_playing)
         is_playing = true;
     // If we're using the eid, get that value from the appends map
-    std::string state = (eid != -1) ? eidAppends[state_] : state_;
+    const std::string state = (!name.empty()) ? eidAppends[state_] : state_;
     if (state == currentState) return;
     if (!currentState.empty())
         animationStates.at(currentState).Reset();
     currentState = state;
 }
 
-void AnimationStateMachine::AddAnimation(const std::string &name, Animation anim) {
-    animationStates.emplace(name, anim);
+void AnimationStateMachine::AddAnimation(const std::string &anim_name, Animation anim) {
+    std::string newName = anim_name;
+    newName.append("_").append(name);
+    eidAppends.emplace(anim_name, newName);
+    animationStates.emplace(newName, anim);
     if (currentState.empty())
-        currentState = name;
-    std::cout << "Successfully added animation " << name << " to state machine" << std::endl;
-}
-
-// This overload is important for entities with sub-animations
-void AnimationStateMachine::AddAnimation(const std::string &name, Animation anim, int eid_) {
-    if (eid != eid_)
-        eid = eid_;
-    std::string newName = name;
-    newName.append(std::to_string(eid));
-    eidAppends.emplace(name, newName);
-    AddAnimation(newName, anim);
+        currentState = newName;
+    std::cout << "Successfully added animation " << newName << " to state machine" << std::endl;
 }
 
 /**

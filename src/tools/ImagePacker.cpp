@@ -30,6 +30,11 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
                 fName = fName.substr(0, fName.find('.'));
             }
 
+            if (std::string parent = file.path().parent_path().filename().string(); parent != "images") {
+                fName.append("_");
+                fName.append(parent);
+            }
+
             images.push_back({temp, fName, temp->w, temp->h});
 
             if (DEBUG_PRINT) {

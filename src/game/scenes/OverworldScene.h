@@ -6,7 +6,6 @@
 #define RPG_OVERWORLDSCENE_H
 
 #include <vector>
-#include "../entities/Entity.h"
 #include "../world/Maps.h"
 #include "Scene.h"
 
@@ -14,7 +13,7 @@ struct SceneBuilder {
     std::string name;
     std::string map_name;
     std::vector<std::string> entities;
-    std::vector<Entity*> entities_by_ptr;
+    std::vector<GlobalEntity*> entities_by_ptr;
     bool is_active;
 };
 
@@ -31,7 +30,7 @@ public:
 private:
     //std::string sceneName;
     bool isActive;
-    std::vector<Entity*> activeEntities;
+    std::vector<GlobalEntity*> activeEntities;
     Maps* map;
 };
 

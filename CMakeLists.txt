@@ -41,7 +41,6 @@ add_executable(RPG
         src/game/gfx/animations/Animation.cpp
         src/game/gfx/animations/AnimationStateMachine.cpp
         src/game/gfx/animations/AnimationStateMachine.h
-        src/game/entities/Entity.cpp
         src/game/InputManager.cpp
         src/game/InputManager.h
         src/tools/Timer.cpp
@@ -70,6 +69,11 @@ add_executable(RPG
         src/game/entities/OverworldEntity.h
         src/game/battle/ElementalAffinity.h
         src/game/battle/Attributes.h
+        src/game/EntityManager.cpp
+        src/game/EntityManager.h
+        src/game/events/EventPoller.cpp
+        src/game/events/EventPoller.h
+        src/game/events/Event.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

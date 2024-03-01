@@ -7,9 +7,9 @@
 
 #include "SDL.h"
 #include "../tools/ImagePacker.h"
-#include "entities/Entity.h"
 #include "gfx/Environment.h"
 #include "world/Maps.h"
+#include "entities/GlobalEntity.h"
 
 #include <string>
 #include <vector>
@@ -36,11 +36,11 @@ public:
     // THIS IS A TEST METHOD
     AnimationStateMachine asmLoader();
     // THIS IS ALSO A TEST
-    std::map<std::string, Entity>* getEntities();
+    std::map<std::string, GlobalEntity>* getEntities();
 
     Environment* getEnvironment(const std::string& name);
     Maps* getMap(const std::string& name);
-    Entity* getEntity(const std::string& name);
+    GlobalEntity* getEntity(const std::string& name);
 
 private:
 
@@ -57,7 +57,7 @@ private:
     std::map<std::string, SDL_Rect> textureRects;
     std::map<std::string, Environment> environments;
     std::map<std::string, Maps> maps;
-    std::map<std::string, Entity> Entities;
+    std::map<std::string, GlobalEntity> Entities;
     //std::vector<Entity> Entities;
     SDL_Texture* atlas;
 

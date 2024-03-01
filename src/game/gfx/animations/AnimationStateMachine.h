@@ -9,10 +9,13 @@
 #include <string>
 #include <map>
 
+// TODO: remove old EID implementation artifacts
+
 class AnimationStateMachine {
 public:
     // TODO: create manifest layout for animation data to be stored
     // TODO: create AnimationStateMachine constructor
+    explicit AnimationStateMachine(std::string  name);
     void Update(double dt);
     // Do nothing on same state
     void SetState(const std::string& state_);
@@ -21,17 +24,16 @@ public:
     bool isPlaying();
 
     // TODO this might be temporary
-    void AddAnimation(const std::string& name, Animation anim);
-    void AddAnimation(const std::string& name, Animation anim, int eid_);
+    void AddAnimation(const std::string& anim_name, Animation anim);
 
     Vector2 getSize();
 private:
-    int eid = -1;
-    std::string currentState;
+    std::string name; // used for uniquely identifying the entity
+    std::string currentState{};
     std::map<std::string, Animation> animationStates;
     // More to store in memory, but will make our access time faster by caching the appends
     std::map<std::string, std::string> eidAppends;
-    bool is_playing;
+    bool is_playing = true;
 };
 
 
