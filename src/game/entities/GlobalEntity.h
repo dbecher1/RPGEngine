@@ -5,9 +5,7 @@
 #ifndef GLOBALENTITY_H
 #define GLOBALENTITY_H
 
-#include <optional>
 #include <string>
-
 #include "BattleEntity.h"
 #include "OverworldEntity.h"
 #include "../battle/Attributes.h"
@@ -27,9 +25,8 @@ struct EntityBuilder {
     bool is_player = false;
 };
 
-class GlobalEntity : public IBaseEntity {
+class GlobalEntity final : public IBaseEntity {
 public:
-    //GlobalEntity() = default;
     explicit GlobalEntity(const EntityBuilder& eb);
     void Update(double dt) override;
     void Draw(DrawCommand *dc) override;

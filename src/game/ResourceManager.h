@@ -30,12 +30,10 @@ public:
      */
     bool loadAllResources(SDL_Renderer* renderer);
 
-    SDL_Rect getRectFromTextureName(const std::string& fileName);
-    SDL_Texture* getAtlas();
+    SDL_Rect getRectFromTextureName(const std::string& fileName) const;
+    SDL_Texture* getAtlas() const;
 
-    // THIS IS A TEST METHOD
-    AnimationStateMachine asmLoader();
-    // THIS IS ALSO A TEST
+    // TODO get rid of this eventually
     std::map<std::string, GlobalEntity>* getEntities();
 
     Environment* getEnvironment(const std::string& name);
@@ -58,7 +56,6 @@ private:
     std::map<std::string, Environment> environments;
     std::map<std::string, Maps> maps;
     std::map<std::string, GlobalEntity> Entities;
-    //std::vector<Entity> Entities;
     SDL_Texture* atlas;
 
     std::vector<std::string> TEMP_fileNames; // used to make sure we don't double load tilemap textures

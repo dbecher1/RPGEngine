@@ -6,7 +6,6 @@
 #include "../tools/extern/json.hpp"
 #include "../tools/MapLoader.hpp"
 #include "world/Maps.h"
-#include "EntityManager.h"
 
 #include <iostream>
 #include <filesystem>
@@ -15,9 +14,7 @@
 #include "battle/ElementalAffinity.h"
 
 /// TODO: probably set an upper limit on texture packing and create a way for a multi-level hierarchy of images
-// TODO: Create an Entity manifest, create AnimationStateMachine loader from this
 
-#define TEST_PATH "../resources/images/"
 #define IMAGE_PATH "../resources/images/"
 #define ANIMATION_PATH "../resources/animations/"
 #define ENTITY_PATH "../resources/entities/"
@@ -34,7 +31,7 @@ ResourceManager::~ResourceManager() {
 bool ResourceManager::loadAllResources(SDL_Renderer* renderer) {
     bool flag = this->loadMaps(renderer);
     flag = flag && this->loadTextures(renderer);
-    if (DEBUG_PRINT) {
+    if constexpr (DEBUG_PRINT) {
         std::cout << "\n===TEXTURE RECT INFORMATION===" << std::endl;
         for (const auto &r : this->textureRects) {
             std::cout << r.first << " - ";
@@ -55,7 +52,7 @@ bool ResourceManager::loadAllResources(SDL_Renderer* renderer) {
  * @return True if successful
  */
 bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
-    // TODO: add in a check to only run the generation if the files have been updated
+
     for (const auto &p : iter_dir(MAP_PATH)) {
 
         if (p.is_directory()) {
@@ -65,29 +62,28 @@ bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
                 .map_name = mapName,
             };
 
-            // this allocates on the heap, needs to be deleted at end of loop iteration
             auto dataRaw = MapLoader::loadRawMapData(p.path(), renderer);
 
             if (dataRaw == nullptr)
                 continue;
 
-            for (auto& layer : dataRaw->layerData) {
+            for (auto &[mapName, layer, texture, tileOverrides] : dataRaw->layerData) {
 
-                std::string name_noExt = layer.mapName;
-                name_noExt.append(std::to_string(layer.layer));
+                std::string name_noExt = mapName;
+                name_noExt.append(std::to_string(layer));
 
-                if (layer.layer >= 3 && layer.layer <= 5) {
-                    mapBuilder.map_layers.push_back({name_noExt, layer.layer, std::move(layer.tileOverrides)});
+                if (layer >= 3 && layer <= 5) {
+                    mapBuilder.map_layers.push_back({name_noExt, layer, std::move(tileOverrides)});
                 }
                 else {
                     auto layerFileName = createLocalFileName(name_noExt);
 
-                    writeTexture(layer.texture, renderer, layerFileName);
+                    writeTexture(texture, renderer, layerFileName);
 
-                    SDL_DestroyTexture(layer.texture);
+                    SDL_DestroyTexture(texture);
 
                     // this is where we make the map object
-                    mapBuilder.map_layers.push_back({name_noExt, layer.layer});
+                    mapBuilder.map_layers.push_back({name_noExt, layer});
                 }
             }
             mapBuilder.set_name = dataRaw->tileSetName;
@@ -101,28 +97,23 @@ bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
                 auto fileName = createLocalFileName(dataRaw->tileSetName);
                 writeTexture(dataRaw->tileSet, renderer, fileName);
             }
-            delete dataRaw;
         }
     }
     return true;
 }
 
-SDL_Rect ResourceManager::getRectFromTextureName(const std::string &fileName) {
+SDL_Rect ResourceManager::getRectFromTextureName(const std::string &fileName) const {
     if (this->textureRects.count(fileName) == 0)
         return {};
     return this->textureRects.at(fileName);
 }
 
 bool ResourceManager::loadTextures(SDL_Renderer* renderer) {
-    ImagePacker packer;
-    packer.loadImages(renderer, this, TEST_PATH);
-
+    ImagePacker::loadImages(renderer, this, IMAGE_PATH);
     return true;
 }
 
 bool ResourceManager::loadEntities() {
-
-    // TODO: might want to -actually- put animation loading in its own function
 
     for (const auto& file : iter_dir(ENTITY_PATH)) {
 
@@ -133,14 +124,15 @@ bool ResourceManager::loadEntities() {
         json manifest = json::parse(istream);
         istream.close();
 
-        std::string name, affinity_;
-
         try {
+            std::string affinity_;
+            std::string name;
             float moveSpeed;
             int z;
+
             name = manifest["Name"];
             affinity_ = manifest["Element"];
-            //ElementalAffinity affinity = getTypeFromString(affinity_.c_str());
+            ElementalAffinity affinity = getTypeFromString(affinity_);
             // TODO: Attributes
 
             moveSpeed = manifest["Overworld"]["MoveSpeed"];
@@ -203,14 +195,21 @@ bool ResourceManager::loadEnvironments() {
     std::ifstream istream(ENVIRONMENT_PATH);
     json manifest = json::parse(istream);
     istream.close();
+
     for (const auto& env : manifest) {
         EnvironmentBuilder eb;
-        eb.name = env["Name"];
-        if (env.contains("SpriteName")) {
-            eb.use_spriteName = true;
-            eb.sprite_name = env["SpriteName"];
+        try {
+            eb.name = env["Name"];
+            if (env.contains("SpriteName")) {
+                eb.use_spriteName = true;
+                eb.sprite_name = env["SpriteName"];
+            }
+            eb.z = env["Z"];
+        } catch (json::type_error &e) {
+            std::cerr << e.what() << std::endl;
+        } catch (json::parse_error &e) {
+            std::cerr << e.what() << std::endl;
         }
-        eb.z = env["Z"];
         environments.emplace(eb.name, eb);
     }
 
@@ -258,7 +257,7 @@ std::string ResourceManager::createLocalFileName(const std::string &name) {
     return out;
 }
 
-SDL_Texture *ResourceManager::getAtlas() {
+SDL_Texture *ResourceManager::getAtlas() const {
     return atlas;
 }
 

@@ -35,45 +35,51 @@ add_executable(RPG
         src/game/scenes/OverworldScene.cpp
         src/tools/ImagePacker.cpp
         src/game/gfx/Environment.cpp
-        src/math/Vector2.cpp
         src/game/SpriteBatch.cpp
-        src/game/SpriteBatch.h
         src/game/gfx/animations/Animation.cpp
         src/game/gfx/animations/AnimationStateMachine.cpp
-        src/game/gfx/animations/AnimationStateMachine.h
         src/game/InputManager.cpp
-        src/game/InputManager.h
         src/tools/Timer.cpp
-        src/tools/Timer.h
-        src/math/MiscMath.h
-        src/tools/MapLoader.cpp
         src/game/world/Maps.cpp
-        src/game/world/Maps.h
-        src/tools/Tile.h
         src/game/gfx/Camera.cpp
-        src/game/gfx/Camera.h
         src/game/ui/UIManager.cpp
-        src/game/ui/UIManager.h
         src/game/ui/UIElement.cpp
+        src/game/state/GlobalState.cpp
+        src/game/entities/GlobalEntity.cpp
+        src/game/entities/BattleEntity.cpp
+        src/game/entities/OverworldEntity.cpp
+        src/game/EntityManager.cpp
+        src/game/events/EventPoller.cpp
+        src/game/SpriteBatch.h
+        src/game/SceneManager.h
+        src/game/ResourceManager.h
+        src/game/InputManager.h
+        src/game/EntityManager.h
+        src/game/world/Maps.h
+        src/game/ui/UIManager.h
         src/game/ui/UIElement.h
         src/game/state/GlobalState.h
-        src/game/state/GlobalState.cpp
-        src/game/battle/Job.h
         src/game/scenes/Scene.h
-        src/game/entities/GlobalEntity.cpp
+        src/game/scenes/OverworldScene.h
+        src/game/misc/macros.h
+        src/game/gfx/Environment.h
+        src/game/gfx/DrawCommand.h
+        src/game/gfx/Camera.h
+        src/game/events/Event.h
+        src/game/events/EventPoller.h
+        src/game/entities/BattleEntity.h
         src/game/entities/GlobalEntity.h
         src/game/entities/IBaseEntity.h
-        src/game/entities/BattleEntity.cpp
-        src/game/entities/BattleEntity.h
-        src/game/entities/OverworldEntity.cpp
         src/game/entities/OverworldEntity.h
-        src/game/battle/ElementalAffinity.h
         src/game/battle/Attributes.h
-        src/game/EntityManager.cpp
-        src/game/EntityManager.h
-        src/game/events/EventPoller.cpp
-        src/game/events/EventPoller.h
-        src/game/events/Event.h
+        src/game/battle/ElementalAffinity.h
+        src/game/battle/Job.h
+        src/math/MiscMath.h
+        src/math/Vector2.h
+        src/tools/ImagePacker.h
+        src/tools/MapLoader.hpp
+        src/tools/Tile.h
+        src/tools/Timer.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

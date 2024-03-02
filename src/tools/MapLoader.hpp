@@ -14,6 +14,7 @@
 #include <vector>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 
 using json = nlohmann::json;
 using iter_dir = std::filesystem::recursive_directory_iterator;
@@ -27,7 +28,6 @@ namespace MapLoader {
         std::string mapName;
         int layer;
         SDL_Texture* texture;
-        // std::vector<SDL_Rect> srcRects;
         std::vector<Tile> tileOverrides;
     };
 
@@ -50,7 +50,7 @@ namespace MapLoader {
 
     struct TileSetData {
         int tileWidth, tileHeight, imageWidth, imageHeight, numTiles, mapWidth, mapHeight;
-        inline SDL_Rect getSrcRectFromId(int id) {
+        [[nodiscard]] inline SDL_Rect getSrcRectFromId(const int id) const {
             return {((id % mapWidth) - 1) * tileWidth,
                     (id / mapWidth) * tileHeight,
                     tileWidth, tileHeight};
@@ -60,7 +60,8 @@ namespace MapLoader {
     /**
      * Given a path extension, populates the path pointer to the path of that file and returns true if successful.
      * Assumes that there will only be one file of that type in the directory, else will return the first result found.
-     * @param path A pointer to the path variable to set the value to if successful
+     * @param searchDir The directory to search.
+     * @param dest A pointer to the path variable to set the value to if successful
      * @param ext A string representation of the extension to search for
      * @return True if successful, else false
      */
@@ -85,7 +86,7 @@ namespace MapLoader {
      * Given a file path (to a directory containing map data), constructs the map into SDL Textures and returns a vector of containing objects
      * The folder is expected to have exactly one of: .png, .tsj, .tmj files
      */
-    inline RawMapData* loadRawMapData(const Path &path, SDL_Renderer* renderer) {
+    inline std::unique_ptr<RawMapData> loadRawMapData(const Path &path, SDL_Renderer* renderer) {
         std::vector<TileLayer> layers; // used for parsing
         std::vector<RawMapLayerData> data; // used for final data
 
@@ -201,7 +202,7 @@ namespace MapLoader {
                 h = h_;
 
             SDL_Texture* layer_texture = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, w_, h_);
-            // std::vector<SDL_Rect> src_rects; // only for use in certain situations
+
             std::vector<Tile> tile_overrides;
 
             // TODO: this will assume uniform chunk sizes... double check that
@@ -210,17 +211,16 @@ namespace MapLoader {
             for (int i = 0; i < layer.chunks.size(); i++) {
                 // i is chunk offset
                 for (int y = 0; y < layer.chunks[i].height; y++) {
-
                     for (int x = 0; x < layer.chunks[i].width; x++) {
 
                         int real_x = ((i % num_chunks_x) * layer.chunks[i].width * tileSet.tileWidth) + (x * tileSet.tileWidth);
-                        int real_y = ((i / num_chunks_x) * layer.chunks[i].height * tileSet.tileHeight) + (y * tileSet.tileHeight); // !! possible bug source
+                        int real_y = ((i / num_chunks_x) * layer.chunks[i].height * tileSet.tileHeight) + (y * tileSet.tileHeight);
                         int tile_id = layer.chunks[i].tileData[(y * layer.chunks[i].width) + x];
 
                         if (tile_id == 0)
                             continue;
 
-                        SDL_Rect src = tileSet.getSrcRectFromId(tile_id); // !! possible bug source
+                        SDL_Rect src = tileSet.getSrcRectFromId(tile_id);
                         SDL_Rect dest = {
                                 .x = real_x,
                                 .y = real_y,
@@ -243,14 +243,13 @@ namespace MapLoader {
             }
             RawMapLayerData rmld{dirName, layer.layer_id, layer_texture};
             if (layer.layer_id >= 3 && layer.layer_id <= 5) {
-                // rmld.srcRects = std::move(src_rects);
                 rmld.tileOverrides = std::move(tile_overrides);
             }
             data.push_back(rmld);
         }
         SDL_SetRenderTarget(renderer, nullptr);
 
-        return new RawMapData{std::move(data), text, img_name, w, h};
+        return std::make_unique<RawMapData>(RawMapData{std::move(data), text, img_name, w, h});
     }
 }
 

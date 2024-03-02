@@ -22,8 +22,8 @@
 /// 9 - Maybe UI?
 /// This is important because only the Entity layers will be Y-sorted
 
-#define NUM_DRAW_LAYERS 10
-#define NUM_THREADS 3
+constexpr int NUM_DRAW_LAYERS = 10;
+constexpr bool USE_LETTERBOXING = false;
 
 struct SpriteBatchBuilder {
     SDL_Window* window;

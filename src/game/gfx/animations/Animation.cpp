@@ -4,12 +4,12 @@
 
 #include "Animation.h"
 
-Animation::Animation(int framesX, int framesY, double speed, Vector2 atlasSize)
+Animation::Animation(const int framesX, const int framesY, const double speed, const Vector2 atlasSize)
 : numFramesX(framesX), numFramesY(framesY), animationSpeed(speed * ANIMATION_SPEED_MULTIPLIER), size({atlasSize.x / static_cast<float>(framesX), atlasSize.y / static_cast<float>(framesY)}) {
     totalFrames = numFramesX * numFramesY;
 }
 
-void Animation::Update(double dt) {
+void Animation::Update(const double dt) {
     accumulator += dt;
     if (accumulator > animationSpeed) {
         accumulator = 0;
@@ -24,7 +24,7 @@ void Animation::Draw(DrawCommand *dc) const {
     dc->useOffset = true;
     dc->useDimensions = true;
     dc->offset.x = static_cast<float>(currentFrame % numFramesX);
-    dc->offset.y = static_cast<float>(static_cast<int>(currentFrame / numFramesX)); // ugly
+    dc->offset.y = static_cast<float>(currentFrame / numFramesX); // NOLINT(*-integer-division)
     dc->dimensions = size;
 }
 
@@ -33,7 +33,7 @@ void Animation::Reset() {
     accumulator = 0;
 }
 
-Vector2 Animation::getSize() {
+Vector2 Animation::getSize() const {
     return size;
 }
 

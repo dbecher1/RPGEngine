@@ -7,7 +7,7 @@
 
 #include "../game/misc/macros.h"
 
-inline bool float_eq(float f1, float f2) {
+inline bool float_eq(const float f1, const float f2) {
     return std::abs(f1 - f2) <= EPSILON;
 }
 

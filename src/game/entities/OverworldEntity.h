@@ -18,7 +18,7 @@ public:
     void Draw(DrawCommand *dc) override;
     void FixedUpdate() override;
 
-    Vector2 getPosition() const;
+    [[nodiscard]] Vector2 getPosition() const;
     Vector2 getDrawOffset();
 private:
     AnimationStateMachine Animations;

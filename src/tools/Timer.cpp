@@ -33,10 +33,15 @@
 
 CURRENT_DECL;
 PREV_DECL;
+static bool first_tick = true;
 
 void Timer::tick() {
     current = GET_TIME();
     dt = CALCULATE_TIME(current, previous);
+    // Setting a flag manually just so there's not any weirdness on the first iteration of the loop
+    if (first_tick) {
+        dt = 0;
+        first_tick = false;
+    }
     previous = current;
-    // std::cout << dt << std::endl;
 }

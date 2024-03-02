@@ -40,22 +40,22 @@ public:
     void Update(Vector2 position);
     void setCurrentWorldDimensions(int w, int h);
 
-    void setCamera();
-    void unsetCamera();
+    void setCamera() const;
+    void unsetCamera() const;
 
-    bool rectInFrame(SDL_FRect* rect);
-    SDL_FRect getViewport();
-    SDL_FRect getSubRect();
+    bool rectInFrame(const SDL_FRect* rect) const;
+    [[nodiscard]] SDL_FRect getViewport() const;
+    [[nodiscard]] SDL_FRect getSubRect() const;
 private:
-    SDL_FPoint last_pos;
+    SDL_FPoint last_pos{};
     SDL_FRect viewPort{};
     SDL_FRect subRect{};
     SDL_Texture* backBuffer = nullptr;
-    SDL_Renderer* renderer;
-    int screenWidth;
-    int screenHeight;
-    int windowWidth;
-    int windowHeight;
+    SDL_Renderer* renderer{};
+    int screenWidth{};
+    int screenHeight{};
+    int windowWidth{};
+    int windowHeight{};
     int worldWidth{};
     int worldHeight{};
 };

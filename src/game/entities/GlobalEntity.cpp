@@ -3,7 +3,6 @@
 //
 
 #include "GlobalEntity.h"
-#include "../state/GlobalState.h"
 
 GlobalEntity::GlobalEntity(const EntityBuilder& eb) :
 EntityName(eb.name), Affinity(eb.affinity),

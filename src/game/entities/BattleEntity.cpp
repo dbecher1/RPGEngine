@@ -3,7 +3,6 @@
 //
 
 #include "BattleEntity.h"
-
 #include "GlobalEntity.h"
 
 BattleEntity::BattleEntity(const EntityBuilder &eb) :

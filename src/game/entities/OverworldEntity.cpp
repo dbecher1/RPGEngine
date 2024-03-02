@@ -25,7 +25,7 @@ void OverworldEntity::Update(double dt) {
             delta.x += 1;
     }
     // TODO: make this state machine more robust
-    // Particularly, make the animation names more.. concrete
+    // Particularly, make the animation names more.. concrete, enum?
     lastState = currState;
     if (delta.y == 0.0f) {
         if (delta.x > 0.0f) {
@@ -44,7 +44,7 @@ void OverworldEntity::Update(double dt) {
     if (lastState != currState)
         Animations.SetState(currState);
 
-    // TODO: this is only for sprites that have no idle animation... check that
+    // ! FIXME: This is broken !
     if (!delta.isZero()) {
         Animations.Update(dt);
     } else {
@@ -60,6 +60,7 @@ void OverworldEntity::Draw(DrawCommand *dc) {
 }
 
 void OverworldEntity::FixedUpdate() {
+    // Fixed update interval = inverse of frame rate
     position += delta * moveSpeed * FIXED_UPDATE_INTERVAL;
 }
 

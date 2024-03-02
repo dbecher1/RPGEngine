@@ -13,20 +13,18 @@ struct Vector2 {
         return std::sqrt((x * x) + (y * y));
     }
     inline void Normalize() {
-        float len = Length();
-        if (len > 0.0f) {
+        if (const float len = Length(); len > 0.0f) {
             x = x / len;
             y = y / len;
         }
     };
     inline void TryNormalize() {
-        float len = Length();
-        if (len > 1.0f) {
+        if (const float len = Length(); len > 1.0f) {
             x = x / len;
             y = y / len;
         }
     }
-    inline bool isZero() const {
+    [[nodiscard]] inline bool isZero() const {
         return (x == 0.0f) && (y == 0.0f);
     }
     inline Vector2 operator + (const Vector2& rhs) const {
@@ -36,10 +34,10 @@ struct Vector2 {
         this->x += rhs.x;
         this->y += rhs.y;
     }
-    inline Vector2 operator * (float scalar) const {
+    inline Vector2 operator * (const float scalar) const {
         return {this->x * scalar, this->y * scalar};
     }
-    inline void operator *= (float scalar) {
+    inline void operator *= (const float scalar) {
         this->x *= scalar;
         this->y *= scalar;
     }

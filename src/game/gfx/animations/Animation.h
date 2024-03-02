@@ -18,7 +18,7 @@ public:
     void Update(double dt);
     void Draw(DrawCommand* dc) const;
     void Reset();
-    Vector2 getSize();
+    [[nodiscard]] Vector2 getSize() const;
 private:
     Vector2 size;
     int currentFrame = 0, numFramesX, numFramesY, totalFrames;

@@ -19,7 +19,6 @@ void Maps::Draw(SpriteBatch *sb) {
             for (auto& tile : l.tileOverrides) {
                 dc.SpriteName = tileSetName.c_str();
                 dc.overrideSrcRect = true;
-                // dc.override = &l.srcRects;
                 dc.tileOverride = &tile;
                 // Need to set the y value so that we get y-sorting
                 dc.position.y = tile.dest.y;

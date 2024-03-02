@@ -11,27 +11,24 @@ SceneManager::SceneManager(SDL_Window* window) {
 
     resourceManager = new ResourceManager();
 
-    SpriteBatchBuilder sb {window, resourceManager};
-    spriteBatch = new SpriteBatch(sb);
+    spriteBatch = new SpriteBatch({window, resourceManager});
 
     resourceManager->loadAllResources(spriteBatch->renderer);
     spriteBatch->atlas = resourceManager->getAtlas();
 
     SceneBuilder sceneBuilder{"demo", "demo"};
-    //sceneBuilder.entities.emplace_back("Character");
     player = resourceManager->getEntity("Celes");
     sceneBuilder.entities_by_ptr.push_back(player);
-    OverworldScene s{sceneBuilder, resourceManager};
+    const OverworldScene s{sceneBuilder, resourceManager};
     SceneStack.push_back(new OverworldScene(s));
 
     uiManager = new UIManager();
-    // gameState = GlobalState::GetGlobalState();
 
     spriteBatch->setCameraBoundaries(s.getCurrentWorldBoundaries());
 }
 
 SceneManager::~SceneManager() {
-    for (auto s : SceneStack) {
+    for (const auto &s : SceneStack) {
         delete s;
     }
     delete uiManager;
@@ -39,7 +36,7 @@ SceneManager::~SceneManager() {
     delete spriteBatch;
 }
 
-void SceneManager::Update(double dt) {
+void SceneManager::Update(const double dt) {
 
     while (eventPoller.Poll(&e)) {
         switch (e.type) {
@@ -55,31 +52,25 @@ void SceneManager::Update(double dt) {
     SceneStack.back()->Update(dt);
     // spriteBatch->Update(player->getDrawOffset()); // TODO
 
-    idk += dt;
-    if (idk > 1) {
-        idk = 0;
-        uiManager->ToggleState("pause");
-        uiManager->ToggleState("dialog");
-    }
 }
 
-void SceneManager::Draw() {
+void SceneManager::Draw() const {
     for (const auto &scene : SceneStack) {
         scene->Draw(spriteBatch);
     }
-    //uiManager->Draw(spriteBatch);
+    // uiManager->Draw(spriteBatch);
     spriteBatch->SubmitDraw();
 }
 
-void SceneManager::windowResizeEvent(int w, int h) {
+void SceneManager::windowResizeEvent(const int w, const int h) const {
     spriteBatch->windowResizeEvent(w, h);
 }
 
-void SceneManager::resetDefaultWindowSize(SDL_Window *window) {
+void SceneManager::resetDefaultWindowSize(SDL_Window *window) const {
     spriteBatch->resetDefaultWindowSize(window);
 }
 
-void SceneManager::FixedUpdate() {
+void SceneManager::FixedUpdate() const {
     SceneStack.back()->FixedUpdate();
 }
 

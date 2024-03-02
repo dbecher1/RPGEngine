@@ -12,14 +12,12 @@ UIElement::UIElement(const UIElementBuilder& builder) :
 elementColor(builder.color), outlineColor(builder.outline_color),
 is_active(builder.is_active), name(builder.name) {
 
-    // auto state = GlobalState::GetGlobalState();
-
     SDL_Rect r = convertRectToScreen(builder.Location);
-    int radius = static_cast<int>(builder.curve * GlobalState::GameWindow_CurrentWidth);
+    const int radius = static_cast<int>(builder.curve * GlobalState::GameWindow_CurrentWidth);
 
     for (int i = 0; i < 4; i++) {
-        int x_ = r.x + ((i % 2) * r.w);
-        int y_ = r.y + ((i / 2) * r.h);
+        const int x_ = r.x + ((i % 2) * r.w);
+        const int y_ = r.y + ((i / 2) * r.h);
         GenerateCircle(&curved_edges[i], radius, {x_, y_}, i);
     }
 

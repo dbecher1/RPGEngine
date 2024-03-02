@@ -16,21 +16,26 @@ enum ElementalAffinity {
     LIGHT,
     DARK
 };
-/*
-inline ElementalAffinity getTypeFromString(const char* s) {
-    switch (s) {
-        case "Fire": return FIRE;
-        case "Ice": return ICE;
-        case "Thunder": return THUNDER;
-        case "Earth": return EARTH;
-        case "Water": return WATER;
-        case "Wind": return WIND;
-        case "Light": return LIGHT;
-        case "Dark": return DARK;
-        default: break;
-    }
-    return NONE;
+
+inline ElementalAffinity getTypeFromString(const std::string& s) {
+    ElementalAffinity e = NONE;
+    if (s == "Fire")
+        e = FIRE;
+    else if (s == "Ice")
+        e = ICE;
+    else if (s == "Thunder")
+        e = THUNDER;
+    else if (s == "Earth")
+        e = EARTH;
+    else if (s == "Water")
+        e = WATER;
+    else if (s == "Wind")
+        e = WIND;
+    else if (s == "Light")
+        e = LIGHT;
+    else if (s == "Dark")
+        e = DARK;
+    return e;
 }
-*/
 
 #endif //ELEMENTALAFFINITY_H

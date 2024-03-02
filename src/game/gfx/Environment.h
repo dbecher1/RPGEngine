@@ -11,6 +11,7 @@
 struct EnvironmentBuilder {
     std::string name;
     // for when the sprite name != wanted display name
+    // TODO: revisit this
     std::string sprite_name;
     int z = 0;
     bool use_spriteName = false;
@@ -21,14 +22,13 @@ struct EnvironmentBuilder {
  */
 class Environment {
 public:
-    //Environment() = delete;
     Environment() = default;
     explicit Environment(const EnvironmentBuilder& eb);
-    void Draw(DrawCommand* dc);
+    void Draw(DrawCommand* dc) const;
 private:
     std::string name;
     std::string spriteName;
-    int z;
+    int z{};
     bool useSpriteName = false;
 };
 

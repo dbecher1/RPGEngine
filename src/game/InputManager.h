@@ -5,8 +5,6 @@
 #ifndef RPG_INPUTMANAGER_H
 #define RPG_INPUTMANAGER_H
 
-#include "SDL_events.h" // TODO: remove
-#include "SDL_scancode.h"
 #include "SDL_keyboard.h"
 
 #define UP_ SDL_SCANCODE_UP

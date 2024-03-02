@@ -15,7 +15,6 @@ class SpriteBatch;
 struct MapLayer {
     std::string name;
     int layer;
-    // std::vector<SDL_Rect> srcRects;
     std::vector<Tile> tileOverrides;
 };
 

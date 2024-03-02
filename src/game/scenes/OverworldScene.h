@@ -19,14 +19,14 @@ struct SceneBuilder {
 
 class ResourceManager;
 
-class OverworldScene : public Scene {
+class OverworldScene final : public Scene {
 public:
     OverworldScene(const SceneBuilder& sb, ResourceManager* rm);
     void Update(double dt) override;
     void FixedUpdate() override;
     void AddEntity(const std::string& name);
     void Draw(SpriteBatch* sb) const override;
-    SDL_Point getCurrentWorldBoundaries();
+    [[nodiscard]] SDL_Point getCurrentWorldBoundaries() const;
 private:
     //std::string sceneName;
     bool isActive;

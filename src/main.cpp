@@ -8,6 +8,7 @@
 // TODO: make these a struct for neatness
 
 SDL_Window* window;
+// std::unique_ptr<SceneManager> sceneManager;
 SceneManager* sceneManager;
 
 static Timer timer;
@@ -23,7 +24,6 @@ int main() {
         ERROR_QUIT;
     }
 
-    //window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, INITIAL_WIDTH, INITIAL_HEIGHT, WINDOW_FLAGS);
     window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FLAGS);
     if (window == nullptr) {
         ERROR_QUIT;
@@ -31,10 +31,10 @@ int main() {
 
     InputManager::Init();
     sceneManager = new SceneManager(window);
+    // sceneManager = std::make_unique<SceneManager>(SceneManager(window));
 
     bool quit = false;
     SDL_Event e;
-    bool first_loop = true;
 
     do {
         // Process events
@@ -64,11 +64,6 @@ int main() {
         }
         InputManager::Poll();
 
-        if (first_loop) {
-            first_loop = false;
-            timer.dt = 0;
-        }
-
         sceneManager->Update(timer.dt);
 
         accumulator += timer.dt;
@@ -77,7 +72,9 @@ int main() {
             sceneManager->FixedUpdate();
             accumulator -= FIXED_UPDATE_INTERVAL;
         }
+
         sceneManager->Draw();
+
     } while (!quit);
 
     delete sceneManager;

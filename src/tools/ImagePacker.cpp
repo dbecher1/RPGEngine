@@ -3,8 +3,10 @@
 //
 
 #include "ImagePacker.h"
+#include "SDL2_image/SDL_image.h"
+#include "../game/ResourceManager.h"
 
-#define DEBUG_SAVE_IMAGE true
+constexpr bool DEBUG_SAVE_IMAGE = true;
 
 #include <iostream>
 #include <filesystem>
@@ -36,12 +38,6 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
             }
 
             images.push_back({temp, fName, temp->w, temp->h});
-
-            if (DEBUG_PRINT) {
-                std::cout << "Loaded image " << file.path().filename();
-                std::cout << "\nWidth: " << temp->w;
-                std::cout << "\nHeight: " << temp->h << '\n' << std::endl;
-            }
         }
     }
     sortImageData(&images);
@@ -49,7 +45,7 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
     // Packing sequence begins here after images are sorted
 
     int x = 0, y = 0, max_height = 0, final_height = 0, boundary = 512;
-    const int border = 0; // if we want a space in between images, opting for 0
+    constexpr int border = 0; // if we want a space in between images, opting for 0
     bool success;
     do {
         success = true;
@@ -101,10 +97,6 @@ bool ImagePacker::loadImages(SDL_Renderer* renderer, ResourceManager *resourceMa
 
 inline void ImagePacker::resetPacking(ResourceManager* rm, bool* success, int* boundary, int* x, int* y) {
     *success = false;
-    if (DEBUG_PRINT) {
-        std::cout << "Boundary size " << boundary;
-        std::cout << " too small, growing boundary and trying again." << std::endl;
-    }
     *boundary = static_cast<int>(*boundary * 1.5);
     rm->textureRects.clear();
     *x = 0;
@@ -115,7 +107,7 @@ inline void ImagePacker::resetPacking(ResourceManager* rm, bool* success, int* b
  * Simple custom selection sort implementation; I couldn't get things to work with the standard library functions (due to ImageData being a user defined class). I know there's a way to do that but honestly, this is shorter than figuring that out.
  * @param images The vector to sort
  */
-static inline void sortImageData(std::vector<ImageData>* images) {
+static void sortImageData(std::vector<ImageData>* images) {
 
     for (int i = 0; i < images->size() - 1; i++) {
         int max = images->at(i).height, max_loc = i;
@@ -140,19 +132,5 @@ static inline void sortImageData(std::vector<ImageData>* images) {
         ImageData swap_temp = images->at(i);
         std::swap(images->at(i), images->at(max_loc));
         images->at(max_loc) = std::move(swap_temp);
-        if (DEBUG_PRINT) {
-            std::cout << "Swapped Image A at location " << i << " with B at location " << max_loc << '\n' << std::endl;
-        }
-    }
-    if (DEBUG_PRINT) {
-        printImageData(images);
-    }
-}
-
-static inline void printImageData(std::vector<ImageData>* images) {
-    for (const auto& i : *images) {
-        std::cout << "File name: " << i.fileName;
-        std::cout << "\nWidth: " << i.width;
-        std::cout << "\nHeight: " << i.height << '\n' << std::endl;
     }
 }

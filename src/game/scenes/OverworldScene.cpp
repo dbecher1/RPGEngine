@@ -44,6 +44,6 @@ void OverworldScene::FixedUpdate() {
     }
 }
 
-SDL_Point OverworldScene::getCurrentWorldBoundaries() {
+SDL_Point OverworldScene::getCurrentWorldBoundaries() const {
     return map->getDimensions();
 }

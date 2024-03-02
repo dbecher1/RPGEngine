@@ -19,11 +19,11 @@ public:
     explicit SceneManager(SDL_Window* window);
     ~SceneManager();
     void Update(double dt);
-    void FixedUpdate();
-    void Draw();
+    void FixedUpdate() const;
+    void Draw() const;
 
-    void windowResizeEvent(int w, int h);
-    void resetDefaultWindowSize(SDL_Window* window);
+    void windowResizeEvent(int w, int h) const;
+    void resetDefaultWindowSize(SDL_Window* window) const;
 private:
     EventPoller eventPoller{};
     RPG::Event e;
