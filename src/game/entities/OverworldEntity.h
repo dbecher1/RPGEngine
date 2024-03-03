@@ -19,7 +19,7 @@ public:
     void FixedUpdate() override;
 
     [[nodiscard]] Vector2 getPosition() const;
-    Vector2 getDrawOffset();
+    Vector2 getDrawOffset() const;
 private:
     AnimationStateMachine Animations;
     int z_layer;
@@ -29,6 +29,8 @@ private:
     bool IsPlayer;
     // TODO: I hate this
     std::string currState, lastState;
+
+    Vector2 last_delta{};
 };
 
 #endif //OVERWORLDENTITY_H

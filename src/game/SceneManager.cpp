@@ -58,7 +58,7 @@ void SceneManager::Draw() const {
     for (const auto &scene : SceneStack) {
         scene->Draw(spriteBatch);
     }
-    // uiManager->Draw(spriteBatch);
+    uiManager->Draw(spriteBatch);
     spriteBatch->SubmitDraw();
 }
 

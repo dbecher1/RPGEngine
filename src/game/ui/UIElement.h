@@ -34,6 +34,7 @@ private:
     std::string name;
     SDL_Color elementColor{};
     SDL_Color outlineColor{};
+    SDL_Rect raw_rect{};
     std::vector<SDL_Rect> rects;
     std::array<std::vector<SDL_Point>, 4> curved_edges;
     std::vector<SDL_Point> outline_straight;

@@ -33,9 +33,14 @@ SpriteBatch::SpriteBatch(const SpriteBatchBuilder sbb)
         // spritebatch has ownership over this
         renderTarget = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
     }
+    ui_target = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);;
 
     camera = Camera{renderer, {windowWidth, windowHeight}, {screenWidth, screenHeight}};
     camera.Init_BackBuffer();
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(ui_target, SDL_BLENDMODE_BLEND);
+    //SDL_SetTextureBlendMode(ui_target, SDL_BLENDMODE_MUL);
+    SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
 }
 
 SpriteBatch::~SpriteBatch() {
@@ -117,7 +122,13 @@ void SpriteBatch::SubmitDraw() {
     // Draw UI
     for (const auto &ui : uiDrawQueue) {
 
-        SDL_SetRenderDrawColor(renderer, ui->elementColor.r, ui->elementColor.g, ui->elementColor.b, ui->elementColor.a);
+        SDL_SetRenderTarget(renderer, ui_target);
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+        // SDL_SetRenderDrawColor(renderer, ui->elementColor.r, ui->elementColor.g, ui->elementColor.b, ui->elementColor.a);
 
         SDL_RenderFillRects(renderer, ui->rects.data(), static_cast<int>(ui->rects.size()));
         for (auto& edge : ui->curved_edges) {
@@ -125,18 +136,29 @@ void SpriteBatch::SubmitDraw() {
         }
 
         // outlines
-        SDL_SetRenderDrawColor(renderer, ui->outlineColor.r, ui->outlineColor.g, ui->outlineColor.b, ui->outlineColor.a);
+        // SDL_SetRenderDrawColor(renderer, ui->outlineColor.r, ui->outlineColor.g, ui->outlineColor.b, ui->outlineColor.a);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
         for (int i = 0; i < ui->outline_straight.size() - 1; i += 2) {
             SDL_RenderDrawLine(renderer, ui->outline_straight[i].x, ui->outline_straight[i].y, ui->outline_straight[i + 1].x, ui->outline_straight[i + 1].y);
         }
 
         SDL_RenderDrawPoints(renderer, ui->outline_curves.data(), static_cast<int>(ui->outline_curves.size()));
+
+        auto t = resourceManager->getRectFromTextureName("UI_gradient2");
+
+        //SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
+        SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_MOD);
+        SDL_RenderCopy(renderer, atlas, &t, &ui->raw_rect);
+
+        SDL_SetRenderTarget(renderer, nullptr);
+        SDL_RenderCopy(renderer, ui_target, nullptr, nullptr);
+        SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
     }
     uiDrawQueue.clear();
 
     const auto r = camera.getSubRect();
-    SDL_RenderDrawRectF(renderer, &r);
+    // SDL_RenderDrawRectF(renderer, &r);
     SDL_RenderPresent(renderer);
 }
 

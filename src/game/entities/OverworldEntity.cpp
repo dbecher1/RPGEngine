@@ -11,7 +11,7 @@ OverworldEntity::OverworldEntity(const EntityBuilder &eb) :
 Animations(eb.overworldAnimations), z_layer(eb.z),
 moveSpeed(eb.overworld_move_speed), IsPlayer(eb.is_player) {}
 
-void OverworldEntity::Update(double dt) {
+void OverworldEntity::Update(const double dt) {
     delta = {0.0f, 0.0f};
     if (IsPlayer) {
         auto [Up, Down, Left, Right, Action, Pause] = *InputManager::GetState();
@@ -44,7 +44,6 @@ void OverworldEntity::Update(double dt) {
     if (lastState != currState)
         Animations.SetState(currState);
 
-    // ! FIXME: This is broken !
     if (!delta.isZero()) {
         Animations.Update(dt);
     } else {
@@ -68,6 +67,6 @@ Vector2 OverworldEntity::getPosition() const {
     return position;
 }
 
-Vector2 OverworldEntity::getDrawOffset() {
+Vector2 OverworldEntity::getDrawOffset() const {
     return position + (Animations.getSize() * 0.5f);
 }

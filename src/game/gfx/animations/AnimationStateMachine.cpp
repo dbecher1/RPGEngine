@@ -13,7 +13,7 @@ void AnimationStateMachine::Draw(DrawCommand *dc) const {
 }
 
 void AnimationStateMachine::Update(const double dt) {
-    if (!is_playing) return;
+    // if (!is_playing) return;
     animationStates.at(currentState).Update(dt);
 }
 
@@ -34,7 +34,7 @@ void AnimationStateMachine::AddAnimation(const std::string &anim_name, Animation
     animationStates.emplace(newName, anim);
     if (currentState.empty())
         currentState = newName;
-    std::cout << "Successfully added animation " << newName << " to state machine" << std::endl;
+    // std::cout << "Successfully added animation " << newName << " to state machine" << std::endl;
 }
 
 /**

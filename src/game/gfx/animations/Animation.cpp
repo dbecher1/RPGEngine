@@ -5,7 +5,7 @@
 #include "Animation.h"
 
 Animation::Animation(const int framesX, const int framesY, const double speed, const Vector2 atlasSize)
-: numFramesX(framesX), numFramesY(framesY), animationSpeed(speed * ANIMATION_SPEED_MULTIPLIER), size({atlasSize.x / static_cast<float>(framesX), atlasSize.y / static_cast<float>(framesY)}) {
+: size({atlasSize.x / static_cast<float>(framesX), atlasSize.y / static_cast<float>(framesY)}), numFramesX(framesX), numFramesY(framesY), animationSpeed(speed * ANIMATION_SPEED_MULTIPLIER) {
     totalFrames = numFramesX * numFramesY;
 }
 

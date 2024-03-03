@@ -17,7 +17,7 @@ UIManager::UIManager() {
             "dialog",
             0.01f,
     };
-    eb2.is_active = false;
+    eb2.is_active = true;
     elements.emplace(eb2.name, eb2);
 }
 
@@ -26,9 +26,9 @@ void UIManager::Update(double dt) {
 }
 
 void UIManager::Draw(SpriteBatch* sb) {
-    for (auto& e : elements) {
-        if (e.second.isActive()) {
-            sb->Add(&e.second);
+    for (auto&[_, snd] : elements) {
+        if (snd.isActive()) {
+            sb->Add(&snd);
         }
     }
 }

@@ -62,6 +62,7 @@ private:
     std::array<std::vector<DrawCommand>, NUM_DRAW_LAYERS> DrawCommands;
     std::vector<UIElement*> uiDrawQueue;
     SDL_Texture* renderTarget{};
+    SDL_Texture* ui_target{};
 
     friend class SceneManager;
     friend class ResourceManager;

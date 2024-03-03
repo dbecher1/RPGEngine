@@ -9,10 +9,11 @@
 // TODO: adjust for when curve = 0
 
 UIElement::UIElement(const UIElementBuilder& builder) :
-elementColor(builder.color), outlineColor(builder.outline_color),
-is_active(builder.is_active), name(builder.name) {
+name(builder.name), elementColor(builder.color),
+outlineColor(builder.outline_color), is_active(builder.is_active) {
 
     SDL_Rect r = convertRectToScreen(builder.Location);
+    raw_rect = r;
     const int radius = static_cast<int>(builder.curve * GlobalState::GameWindow_CurrentWidth);
 
     for (int i = 0; i < 4; i++) {
