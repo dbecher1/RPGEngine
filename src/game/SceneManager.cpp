@@ -22,7 +22,7 @@ SceneManager::SceneManager(SDL_Window* window) {
     const OverworldScene s{sceneBuilder, resourceManager};
     SceneStack.push_back(new OverworldScene(s));
 
-    uiManager = new UIManager();
+    uiManager = new UIManager(resourceManager);
 
     spriteBatch->setCameraBoundaries(s.getCurrentWorldBoundaries());
 }

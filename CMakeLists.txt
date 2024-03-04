@@ -80,6 +80,9 @@ add_executable(RPG
         src/tools/MapLoader.hpp
         src/tools/Tile.h
         src/tools/Timer.h
+        src/game/ui/Font.cpp
+        src/game/ui/Font.h
+        src/tools/extern/schrift.c
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

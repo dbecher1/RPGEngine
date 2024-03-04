@@ -42,6 +42,7 @@
 #define EPSILON 0.00001f
 #define FIXED_UPDATE_RATE 60.0
 #define FIXED_UPDATE_INTERVAL (1.0 / FIXED_UPDATE_RATE)
+#define FONT_CHARACTERS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,:;&*()+=-!?%$\""
 
 // Flag to indicate if the filename will include the file extension
 // Probably will always keep this false

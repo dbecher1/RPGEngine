@@ -5,7 +5,7 @@
 #include "UIManager.h"
 #include "../SpriteBatch.h"
 
-UIManager::UIManager() {
+UIManager::UIManager(const ResourceManager* resourceManager) {
     SDL_FRect r{0.0125f, 0.0125f, 0.25f, 0.5f};
     UIElementBuilder eb = {r, "pause"};
     eb.color = {125, 125, 150, 255};
@@ -19,6 +19,7 @@ UIManager::UIManager() {
     };
     eb2.is_active = true;
     elements.emplace(eb2.name, eb2);
+    default_font = Font(resourceManager);
 }
 
 void UIManager::Update(double dt) {
@@ -31,6 +32,10 @@ void UIManager::Draw(SpriteBatch* sb) {
             sb->Add(&snd);
         }
     }
+    auto demo_text = default_font.GenerateText("Hello!", 32, {20, 100});
+    auto demo_text2 = default_font.GenerateText("Hello?", 32, {500, 500});
+    sb->Add(demo_text);
+    sb->Add(demo_text2);
 }
 
 /**

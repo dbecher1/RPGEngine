@@ -16,10 +16,19 @@ outlineColor(builder.outline_color), is_active(builder.is_active) {
     raw_rect = r;
     const int radius = static_cast<int>(builder.curve * GlobalState::GameWindow_CurrentWidth);
 
+    std::array<std::vector<SDL_Point>, 4> curved_temp;
+
     for (int i = 0; i < 4; i++) {
         const int x_ = r.x + ((i % 2) * r.w);
         const int y_ = r.y + ((i / 2) * r.h);
         GenerateCircle(&curved_edges[i], radius, {x_, y_}, i);
+    }
+
+    // TODO maybe temp
+    for (int i = 0; i < 4; i++) {
+        const int x_ = r.x + ((i % 2) * r.w);
+        const int y_ = r.y + ((i / 2) * r.h);
+        GenerateCircle(&curved_temp[i], radius + 2, {x_, y_}, i);
     }
 
     SDL_Rect left_side = r;
@@ -51,6 +60,15 @@ outlineColor(builder.outline_color), is_active(builder.is_active) {
     outline_straight.push_back({right_side.x + right_side.w, right_side.y});
     outline_straight.push_back({right_side.x + right_side.w, right_side.y + right_side.h});
 
+    outline_straight_2_test.push_back({r.x, r.y - 1});
+    outline_straight_2_test.push_back({r.x + r.w, r.y - 1});
+    outline_straight_2_test.push_back({r.x, r.y + r.h + 1});
+    outline_straight_2_test.push_back({r.x + r.w, r.y + r.h + 1});
+    outline_straight_2_test.push_back({left_side.x - 1, left_side.y});
+    outline_straight_2_test.push_back({left_side.x - 1, left_side.y + left_side.h});
+    outline_straight_2_test.push_back({right_side.x + right_side.w + 1, right_side.y});
+    outline_straight_2_test.push_back({right_side.x + right_side.w + 1, right_side.y + right_side.h});
+
     // hacky, but it works
     for (const auto& p : curved_edges[0]) {
         if (p.x <= r.x && p.y <= left_side.y) {
@@ -73,6 +91,29 @@ outlineColor(builder.outline_color), is_active(builder.is_active) {
             outline_curves.push_back(p);
         }
     }
+
+    // todo prob temp
+    for (const auto& p : curved_temp[0]) {
+        if (p.x <= r.x && p.y <= left_side.y) {
+            outline_curves_2_test.push_back(p);
+        }
+    }
+    for (const auto& p : curved_temp[2]) {
+        if (p.x <= r.x && p.y >= left_side.y + left_side.h) {
+            outline_curves_2_test.push_back(p);
+        }
+    }
+
+    for (const auto& p : curved_temp[1]) {
+        if (p.x >= right_side.x && p.y <= right_side.y) {
+            outline_curves_2_test.push_back(p);
+        }
+    }
+    for (const auto& p : curved_temp[3]) {
+        if (p.x >= right_side.x && p.y >= right_side.y + right_side.h) {
+            outline_curves_2_test.push_back(p);
+        }
+    }
 }
 
 SDL_Rect UIElement::convertRectToScreen(SDL_FRect r) {
@@ -87,7 +128,7 @@ void UIElement::GenerateCircle(std::vector<SDL_Point> *points, int radius, SDL_P
     int y = 0;
     int dx = 1;
     int dy = 1;
-    int err = dx - (radius << 1);
+    int err = dx - (radius * 2);
 
     int x_offset = radius, y_offset = radius;
     // 0 - upper left (default)
@@ -132,7 +173,7 @@ void UIElement::GenerateCircle(std::vector<SDL_Point> *points, int radius, SDL_P
         if (err > 0) {
             x--;
             dx += 2;
-            err += dx - (radius << 1);
+            err += dx - (radius * 2);
         }
     }
 }

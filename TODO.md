@@ -7,8 +7,6 @@
 - With basic UI is done, refine:
   - Add in toggles, sub-menus, etc
   - Implement UI update - add size-agnostic features
-  - Look into skinning?? Might be hard with SDL. Could do some alpha masking hackery though.
-    - Alternatively, maybe generate them at runtime as a texture? That's possible and could build off the code already there, just will likely be a lot of work still.
  - Implement camera update, make sub-square and smooth out movement
     - Guts are there, gotta revisit it
     - Try to implement culling as well
@@ -34,3 +32,5 @@
  - Basic animation support
  - Basic input manager
  - Fix entity animation bug - animation does not begin if state doesn't change
+ - UI skinning?? Whaaaat
+ - Font loading and glyph rendering!!

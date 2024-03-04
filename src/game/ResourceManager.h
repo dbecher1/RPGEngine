@@ -13,7 +13,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 class ImagePacker;
 class SpriteBatch;
@@ -30,20 +30,23 @@ public:
      */
     bool loadAllResources(SDL_Renderer* renderer);
 
-    SDL_Rect getRectFromTextureName(const std::string& fileName) const;
-    SDL_Texture* getAtlas() const;
+    [[nodiscard]] SDL_Rect getRectFromTextureName(const std::string& fileName) const;
+    [[nodiscard]] SDL_Texture* getAtlas() const;
 
     // TODO get rid of this eventually
-    std::map<std::string, GlobalEntity>* getEntities();
+    std::unordered_map<std::string, GlobalEntity>* getEntities();
 
     Environment* getEnvironment(const std::string& name);
     Maps* getMap(const std::string& name);
     GlobalEntity* getEntity(const std::string& name);
 
+    //static const std::string FONT_CHARACTERS;
+
 private:
 
     bool loadTextures(SDL_Renderer* renderer);
     bool loadMaps(SDL_Renderer* renderer);
+    bool loadFonts(SDL_Renderer *renderer);
     bool loadAnimations();
     bool loadEntities();
     bool loadEnvironments();
@@ -52,10 +55,10 @@ private:
     static void writeTexture(SDL_Texture* texture, SDL_Renderer* renderer, const std::string& name);
     static std::string createLocalFileName(const std::string& name);
 
-    std::map<std::string, SDL_Rect> textureRects;
-    std::map<std::string, Environment> environments;
-    std::map<std::string, Maps> maps;
-    std::map<std::string, GlobalEntity> Entities;
+    std::unordered_map<std::string, SDL_Rect> textureRects;
+    std::unordered_map<std::string, Environment> environments;
+    std::unordered_map<std::string, Maps> maps;
+    std::unordered_map<std::string, GlobalEntity> Entities;
     SDL_Texture* atlas;
 
     std::vector<std::string> TEMP_fileNames; // used to make sure we don't double load tilemap textures

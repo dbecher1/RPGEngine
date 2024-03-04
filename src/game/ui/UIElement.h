@@ -39,6 +39,8 @@ private:
     std::array<std::vector<SDL_Point>, 4> curved_edges;
     std::vector<SDL_Point> outline_straight;
     std::vector<SDL_Point> outline_curves;
+    std::vector<SDL_Point> outline_straight_2_test;
+    std::vector<SDL_Point> outline_curves_2_test;
     bool is_active;
 
     static SDL_Rect convertRectToScreen(SDL_FRect r);

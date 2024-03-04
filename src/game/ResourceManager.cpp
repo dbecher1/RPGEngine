@@ -6,6 +6,7 @@
 #include "../tools/extern/json.hpp"
 #include "../tools/MapLoader.hpp"
 #include "world/Maps.h"
+#include "../tools/extern/schrift.h"
 
 #include <iostream>
 #include <filesystem>
@@ -20,6 +21,7 @@
 #define ENTITY_PATH "../resources/entities/"
 #define ENVIRONMENT_PATH "../resources/misc/environments.json"
 #define MAP_PATH "../resources/maps/"
+#define FONT_PATH "../resources/fonts/"
 
 using json = nlohmann::json;
 
@@ -30,6 +32,7 @@ ResourceManager::~ResourceManager() {
 
 bool ResourceManager::loadAllResources(SDL_Renderer* renderer) {
     bool flag = this->loadMaps(renderer);
+    flag = flag && this->loadFonts(renderer);
     flag = flag && this->loadTextures(renderer);
     if constexpr (DEBUG_PRINT) {
         std::cout << "\n===TEXTURE RECT INFORMATION===" << std::endl;
@@ -99,6 +102,89 @@ bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
             }
         }
     }
+    return true;
+}
+
+bool ResourceManager::loadFonts(SDL_Renderer *renderer) {
+
+    #define SWAP_CHARS(c) (c == '"' || c == '*')
+
+    const std::string font = "PublicPixel.ttf";
+
+    const std::string characters{FONT_CHARACTERS};
+
+    constexpr int x_scale = 8;
+    constexpr int y_scale = 8;
+    constexpr int depth = 4;
+
+    // TODO: make this load any and all fonts (maybe), right now just going to load one
+    std::string path = FONT_PATH;
+    path.append(font);
+
+    auto loaded_font = sft_loadfile(path.c_str());
+
+    SFT sft{loaded_font, x_scale, y_scale, 0, 0, 0};
+
+    for (const auto c : characters) {
+        SFT_Glyph glyph;
+
+        // quotation marks are loaded weirdly for some reason, have to make a single exception
+        if (SWAP_CHARS(c))
+            sft.flags = SFT_DOWNWARD_Y;
+        else
+            sft.flags = 0;
+
+        sft_lookup(&sft, c, &glyph);
+        Uint8 px[x_scale * y_scale];
+        const SFT_Image img{px, x_scale, y_scale};
+        sft_render(&sft, glyph, img);
+
+        std::array<Uint8, x_scale * y_scale * depth> pixels_final{};
+
+        for (int y = 0; y < y_scale ; y++) {
+            for (int x = 0; x < x_scale; x++) {
+                const auto ptr = static_cast<Uint8*>(img.pixels);
+                const int idx = (y * x_scale) + x;
+                const Uint8 val = *(ptr + idx);
+
+                // Few things here: 1, making this into a 32 bit image by manually copying the pixels
+                // Have to semi-manually set the alpha value based on the pixel data
+                // We also have to manually flip the pixels on the y axis
+
+                for (int i = 0; i < depth; i++) {
+                    int final_idx;
+
+                    // See note above about how quotes are annoying
+                    if (SWAP_CHARS(c))
+                        final_idx = i + (idx * depth);
+                    else
+                        final_idx = i + ((((y_scale - y - 2) * x_scale) + x) * depth);
+
+                    pixels_final[final_idx] = val;
+                    // alpha weirdness
+
+                }
+            }
+        }
+        // Adjust for a 1 pixel buffer that this library creates
+        const auto surf = SDL_CreateRGBSurfaceFrom(&pixels_final, img.width - 1, img.height - 1, 8 * depth, img.width * depth, 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
+        // rest of the game uses BGRA so it'll complain unless we convert
+        const auto surf_ = SDL_ConvertSurfaceFormat(surf, PIXEL_FORMAT, 0);
+
+        std::string fName = IMAGE_PATH;
+        fName.append("font/");
+
+        fName.append(std::string{c});
+        if (c >= 'a' && c <= 'z') fName.append("_");
+        fName.append(".png");
+
+        IMG_SavePNG(surf_, fName.c_str());
+
+        SDL_FreeSurface(surf);
+        SDL_FreeSurface(surf_);
+    }
+    sft_freefont(loaded_font);
+
     return true;
 }
 
@@ -186,7 +272,7 @@ bool ResourceManager::loadAnimations() {
 }
 
 // TODO: may be deleted (probably)
-std::map<std::string, GlobalEntity> *ResourceManager::getEntities() {
+std::unordered_map<std::string, GlobalEntity> *ResourceManager::getEntities() {
     return &Entities;
 }
 

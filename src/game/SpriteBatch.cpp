@@ -33,13 +33,14 @@ SpriteBatch::SpriteBatch(const SpriteBatchBuilder sbb)
         // spritebatch has ownership over this
         renderTarget = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
     }
-    ui_target = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);;
+    ui_target = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
+    //ui_target = BackbufferTexture(renderer, PIXEL_FORMAT, screenWidth, screenHeight);
 
     camera = Camera{renderer, {windowWidth, windowHeight}, {screenWidth, screenHeight}};
     camera.Init_BackBuffer();
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(ui_target, SDL_BLENDMODE_BLEND);
-    //SDL_SetTextureBlendMode(ui_target, SDL_BLENDMODE_MUL);
+    //ui_target.setBlendMode(SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
 }
 
@@ -47,6 +48,7 @@ SpriteBatch::~SpriteBatch() {
     if (USE_LETTERBOXING) {
         SDL_DestroyTexture(renderTarget);
     }
+    SDL_DestroyTexture(ui_target);
     SDL_DestroyRenderer(renderer);
 }
 
@@ -120,21 +122,23 @@ void SpriteBatch::SubmitDraw() {
     }
 
     // Draw UI
+    // Switch to the UI backbuffer and clear with 0 alpha
+    SDL_SetRenderTarget(renderer, ui_target);
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+    SDL_RenderClear(renderer);
+
+    SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_MOD);
+    const auto t = resourceManager->getRectFromTextureName("UI_gradient");
+
     for (const auto &ui : uiDrawQueue) {
 
-        SDL_SetRenderTarget(renderer, ui_target);
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-        SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-        // SDL_SetRenderDrawColor(renderer, ui->elementColor.r, ui->elementColor.g, ui->elementColor.b, ui->elementColor.a);
 
         SDL_RenderFillRects(renderer, ui->rects.data(), static_cast<int>(ui->rects.size()));
         for (auto& edge : ui->curved_edges) {
             SDL_RenderDrawLines(renderer, edge.data(), static_cast<int>(edge.size()));
         }
-
         // outlines
         // SDL_SetRenderDrawColor(renderer, ui->outlineColor.r, ui->outlineColor.g, ui->outlineColor.b, ui->outlineColor.a);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
@@ -142,23 +146,24 @@ void SpriteBatch::SubmitDraw() {
         for (int i = 0; i < ui->outline_straight.size() - 1; i += 2) {
             SDL_RenderDrawLine(renderer, ui->outline_straight[i].x, ui->outline_straight[i].y, ui->outline_straight[i + 1].x, ui->outline_straight[i + 1].y);
         }
-
         SDL_RenderDrawPoints(renderer, ui->outline_curves.data(), static_cast<int>(ui->outline_curves.size()));
 
-        auto t = resourceManager->getRectFromTextureName("UI_gradient2");
-
-        //SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
-        SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_MOD);
         SDL_RenderCopy(renderer, atlas, &t, &ui->raw_rect);
-
-        SDL_SetRenderTarget(renderer, nullptr);
-        SDL_RenderCopy(renderer, ui_target, nullptr, nullptr);
-        SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
     }
     uiDrawQueue.clear();
 
-    const auto r = camera.getSubRect();
-    // SDL_RenderDrawRectF(renderer, &r);
+    SDL_SetRenderTarget(renderer, nullptr);
+    SDL_RenderCopy(renderer, ui_target, nullptr, nullptr);
+    SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
+
+    // Text
+    for (const auto& text : textQueue) {
+        for (const auto& [src, dst] : text) {
+            SDL_RenderCopy(renderer, atlas, &src, &dst);
+        }
+    }
+    textQueue.clear();
+
     SDL_RenderPresent(renderer);
 }
 
@@ -177,6 +182,10 @@ void SpriteBatch::Add(DrawCommand drawCommand) {
 
 void SpriteBatch::Add(UIElement *ui) {
     uiDrawQueue.push_back(ui);
+}
+
+void SpriteBatch::Add(Text &t) {
+    textQueue.push_back(std:: move(t));
 }
 
 // TODO!!! Update all the resize methods with the new game state object

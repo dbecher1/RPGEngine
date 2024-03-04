@@ -6,9 +6,11 @@
 #define RPG_UIMANAGER_H
 
 #include "UIElement.h"
+#include "Font.h"
 #include <map>
 
 class SpriteBatch;
+class ResourceManager;
 
 /**
  * Class that will accomplish the following two goals:
@@ -17,12 +19,13 @@ class SpriteBatch;
  */
 class UIManager {
 public:
-    UIManager();
+    explicit UIManager(const ResourceManager* resourceManager);
     void Update(double dt);
     void ToggleState(const std::string& name);
     void Draw(SpriteBatch* sb);
 private:
     std::map<std::string, UIElement> elements;
+    Font default_font;
 };
 
 
