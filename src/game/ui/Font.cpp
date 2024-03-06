@@ -20,11 +20,14 @@ Font::Font(const ResourceManager* resourceManager) {
 /**
  *  Returns a vector of tuples of rects in the form of source, dest
  *  (Text is an alias for vector<pair<Rect, Rect>>)
+ *  TODO: Revisit if I want to cache text generation, or if it'll be saved
  */
 Text Font::GenerateText(const std::string& text, const int text_size, const SDL_Point origin) {
+    /*
     auto hash = generateSimpleCustomHash(text, text_size, origin.x, origin.y);
     if (cache.count(hash) > 0)
         return cache[hash];
+    */
     Text out;
     const int len = text.size();
     out.reserve(len);
@@ -33,9 +36,10 @@ Text Font::GenerateText(const std::string& text, const int text_size, const SDL_
         if (text[i] == ' ') continue;
             out.push_back({
                 charToRect[text[i]],
-                {origin.x + ((text_size + 3) * i), origin.y, text_size, text_size}
+                {origin.x + ((static_cast<int>(text_size * TEXT_WIDTH_MANUAL_MOD) + TEXT_SPACE) * i), origin.y, static_cast<int>(text_size * TEXT_WIDTH_MANUAL_MOD), text_size}
             });
         }
+    /*
     if (count < MAX_CACHE_SIZE)
         count++;
     else {
@@ -44,7 +48,12 @@ Text Font::GenerateText(const std::string& text, const int text_size, const SDL_
     }
     cache[hash] = out;
     access_order.push_back(hash);
+    */
     return out;
+}
+
+Text Font::GenerateText(const TextBuilder &builder) {
+    return GenerateText(builder.text_raw, builder.size, builder.origin);
 }
 
 /**

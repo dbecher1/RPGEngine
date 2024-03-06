@@ -24,7 +24,6 @@
 
 constexpr int NUM_DRAW_LAYERS = 10;
 constexpr bool USE_LETTERBOXING = false;
-using Text = std::vector<std::pair<SDL_Rect, SDL_Rect>>;
 
 struct SpriteBatchBuilder {
     SDL_Window* window;
@@ -41,8 +40,7 @@ public:
     ~SpriteBatch();
     void SubmitDraw();
     void Add(DrawCommand drawCommand);
-    void Add(UIElement* ui);
-    void Add(Text& t);
+    void Add(const UIElement* ui);
 
     void Update(Vector2 position);
 
@@ -62,12 +60,10 @@ private:
     SDL_Texture* atlas = nullptr;
     ResourceManager* resourceManager;
     std::array<std::vector<DrawCommand>, NUM_DRAW_LAYERS> DrawCommands;
-    std::vector<UIElement*> uiDrawQueue;
-    std::vector<Text> textQueue;
+    std::vector<const UIElement*> uiDrawQueue;
 
     SDL_Texture* renderTarget{};
     SDL_Texture* ui_target{};
-    //BackbufferTexture ui_target;
 
     friend class SceneManager;
     friend class ResourceManager;

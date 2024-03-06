@@ -8,11 +8,8 @@
 #include <unordered_map>
 #include <string>
 #include <deque>
-#include <map>
 #include <vector>
-#include "SDL_rect.h"
-
-using Text = std::vector<std::pair<SDL_Rect, SDL_Rect>>;
+#include "Text.h"
 
 constexpr int MAX_CACHE_SIZE = 256;
 
@@ -23,6 +20,7 @@ public:
     Font() = default;
     explicit Font(const ResourceManager* resourceManager);
     Text GenerateText(const std::string& text, int text_size, SDL_Point origin);
+    Text GenerateText(const TextBuilder& builder);
 private:
     static Uint32 generateSimpleCustomHash(const std::string& text, int size, int x, int y);
     int count = 0;

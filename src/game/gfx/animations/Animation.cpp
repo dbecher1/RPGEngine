@@ -28,6 +28,11 @@ void Animation::Draw(DrawCommand *dc) const {
     dc->dimensions = size;
 }
 
+// Experimental method, seeing what happens if I force a frame as soon as an animation wakes up
+void Animation::forceFrameAdvance() {
+    currentFrame++;
+}
+
 void Animation::Reset() {
     currentFrame = 0;
     accumulator = 0;

@@ -5,8 +5,11 @@
     - Sit down and think about how exactly I want to structure the interactions/organization between SceneManager/EntityManager/Scenes/ResourceManager. Something feels redundant.
 - Separate the player controllable character from the sprite representation itself. This will make the system conform much easier to the intended vision
 - With basic UI is done, refine:
+  - Implement loading UI models from data
+  - Experiment with using SDL_RenderGeometry to create higher fidelity borders 
+  - Text word wrapping
   - Add in toggles, sub-menus, etc
-  - Implement UI update - add size-agnostic features
+  - Implement UI update method
  - Implement camera update, make sub-square and smooth out movement
     - Guts are there, gotta revisit it
     - Try to implement culling as well
@@ -24,7 +27,6 @@
  - Definitely could benefit from adding more comments too.
 
 ## Done:
- - Basic UI
  - Entity loader, revision 2
  - Spritebatch
    - Performance issues fixed
@@ -32,5 +34,6 @@
  - Basic animation support
  - Basic input manager
  - Fix entity animation bug - animation does not begin if state doesn't change
- - UI skinning?? Whaaaat
+ - Basic UI
+ - Basic UI skinning?? Whaaaat
  - Font loading and glyph rendering!!

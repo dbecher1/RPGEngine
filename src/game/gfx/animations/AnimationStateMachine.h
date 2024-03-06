@@ -15,7 +15,7 @@ public:
 
     void Update(double dt);
     void SetState(const std::string& state_);
-    void Draw(DrawCommand* dc) const;
+    void Draw(DrawCommand* dc);
     void Stop();
 
     void AddAnimation(const std::string& anim_name, Animation anim);

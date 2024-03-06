@@ -6,11 +6,13 @@
 #include "../SpriteBatch.h"
 
 UIManager::UIManager(const ResourceManager* resourceManager) {
+
+    default_font = Font(resourceManager);
+
     SDL_FRect r{0.0125f, 0.0125f, 0.25f, 0.5f};
     UIElementBuilder eb = {r, "pause"};
-    eb.color = {125, 125, 150, 255};
     eb.is_active = true;
-    elements.emplace(eb.name, eb);
+    //elements.emplace(eb.name, eb);
 
     UIElementBuilder eb2 = {
             {0.1f, 0.6, 0.8f, 0.37f},
@@ -18,8 +20,23 @@ UIManager::UIManager(const ResourceManager* resourceManager) {
             0.01f,
     };
     eb2.is_active = true;
+    TextBuilder tb {&default_font, "Hi? Is this thing on? Test!", 24};
+    tb.alignment_x = X_ALIGN_LEFT;
+    tb.alignment_y = Y_ALIGN_TOP;
+    tb.offset.y = 20;
+    eb2.text_builders.push_back(tb);
+
+    UIElementBuilder titleBox = {
+    {0, -0.25f, 0.2f, 0.25f},
+        "dialog_name",
+        0.01f
+    };
+    titleBox.is_active = true;
+    TextBuilder tb2 = {&default_font, "Jill", 16, X_ALIGN_CENTER, Y_ALIGN_MIDDLE};
+    titleBox.text_builders.push_back(tb2);
+    eb2.nodes.push_back(titleBox);
     elements.emplace(eb2.name, eb2);
-    default_font = Font(resourceManager);
+
 }
 
 void UIManager::Update(double dt) {
@@ -29,13 +46,10 @@ void UIManager::Update(double dt) {
 void UIManager::Draw(SpriteBatch* sb) {
     for (auto&[_, snd] : elements) {
         if (snd.isActive()) {
-            sb->Add(&snd);
+            //sb->Add(&snd);
+            snd.Draw(sb);
         }
     }
-    auto demo_text = default_font.GenerateText("Hello!", 32, {20, 100});
-    auto demo_text2 = default_font.GenerateText("Hello?", 32, {500, 500});
-    sb->Add(demo_text);
-    sb->Add(demo_text2);
 }
 
 /**

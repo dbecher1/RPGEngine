@@ -3,32 +3,40 @@
 //
 
 #include "UIElement.h"
+
+#include "Font.h"
 #include "../state/GlobalState.h"
+#include "../SpriteBatch.h"
 
 // TODO: separate width/height radii
 // TODO: adjust for when curve = 0
 
-UIElement::UIElement(const UIElementBuilder& builder) :
-name(builder.name), elementColor(builder.color),
-outlineColor(builder.outline_color), is_active(builder.is_active) {
+/*
+ *  110, 24, 502, 48
+ *  37, 355, 119, 101
+ *  157, 355, 173, 101
+ *  331, 355, 353, 101
+ */
 
-    SDL_Rect r = convertRectToScreen(builder.Location);
+UIElement::UIElement(UIElementBuilder& builder) :
+name(builder.name), is_active(builder.is_active) {
+
+    SDL_Rect r{};
+    if (builder.parent == nullptr)
+        r = convertRectToScreen(builder.Location);
+    else {
+        r.x = builder.parent->x + (builder.Location.x * builder.parent->w);
+        r.y = builder.parent->y + (builder.Location.y * builder.parent->h);
+        r.w = builder.Location.w * builder.parent->w;
+        r.h = builder.Location.h * builder.parent->h;
+    }
     raw_rect = r;
     const int radius = static_cast<int>(builder.curve * GlobalState::GameWindow_CurrentWidth);
-
-    std::array<std::vector<SDL_Point>, 4> curved_temp;
 
     for (int i = 0; i < 4; i++) {
         const int x_ = r.x + ((i % 2) * r.w);
         const int y_ = r.y + ((i / 2) * r.h);
         GenerateCircle(&curved_edges[i], radius, {x_, y_}, i);
-    }
-
-    // TODO maybe temp
-    for (int i = 0; i < 4; i++) {
-        const int x_ = r.x + ((i % 2) * r.w);
-        const int y_ = r.y + ((i / 2) * r.h);
-        GenerateCircle(&curved_temp[i], radius + 2, {x_, y_}, i);
     }
 
     SDL_Rect left_side = r;
@@ -46,6 +54,7 @@ outlineColor(builder.outline_color), is_active(builder.is_active) {
     r.y += 1;
     r.w -= (radius * 2) - 2;
     r.h -= 2;
+    inner_rect = r;
 
     rects.push_back(r);
     rects.push_back(left_side);
@@ -59,15 +68,6 @@ outlineColor(builder.outline_color), is_active(builder.is_active) {
     outline_straight.push_back({left_side.x, left_side.y + left_side.h});
     outline_straight.push_back({right_side.x + right_side.w, right_side.y});
     outline_straight.push_back({right_side.x + right_side.w, right_side.y + right_side.h});
-
-    outline_straight_2_test.push_back({r.x, r.y - 1});
-    outline_straight_2_test.push_back({r.x + r.w, r.y - 1});
-    outline_straight_2_test.push_back({r.x, r.y + r.h + 1});
-    outline_straight_2_test.push_back({r.x + r.w, r.y + r.h + 1});
-    outline_straight_2_test.push_back({left_side.x - 1, left_side.y});
-    outline_straight_2_test.push_back({left_side.x - 1, left_side.y + left_side.h});
-    outline_straight_2_test.push_back({right_side.x + right_side.w + 1, right_side.y});
-    outline_straight_2_test.push_back({right_side.x + right_side.w + 1, right_side.y + right_side.h});
 
     // hacky, but it works
     for (const auto& p : curved_edges[0]) {
@@ -92,27 +92,62 @@ outlineColor(builder.outline_color), is_active(builder.is_active) {
         }
     }
 
-    // todo prob temp
-    for (const auto& p : curved_temp[0]) {
-        if (p.x <= r.x && p.y <= left_side.y) {
-            outline_curves_2_test.push_back(p);
+    for (const auto& t : builder.text_builders) {
+        TextBuilder tb = t;
+        const int w = t.calculateWidth();
+        const int h = t.calculateHeight();
+        const int x_margin = inner_rect.w * 0.015625; // 1/64 of width
+        const int y_margin = inner_rect.h * 0.0625; // 1/16 of height
+
+        switch (t.alignment_x) {
+            case X_ALIGN_NONE: {
+                tb.origin.x += inner_rect.x;
+                break;
+            }
+            case X_ALIGN_LEFT: {
+                tb.origin.x = inner_rect.x + x_margin;
+                break;
+            }
+            case X_ALIGN_CENTER: {
+                const int half_w = w / 2;
+                const int half_rect_w = inner_rect.w / 2;
+                tb.origin.x = inner_rect.x + half_rect_w - half_w;
+                break;
+            }
+            case X_ALIGN_RIGHT: {
+                tb.origin.x = inner_rect.x + inner_rect.w - w - x_margin;
+                break;
+            }
         }
-    }
-    for (const auto& p : curved_temp[2]) {
-        if (p.x <= r.x && p.y >= left_side.y + left_side.h) {
-            outline_curves_2_test.push_back(p);
+
+        switch (t.alignment_y) {
+            case Y_ALIGN_NONE: {
+                tb.origin.y += inner_rect.y;
+                break;
+            }
+            case Y_ALIGN_TOP: {
+                tb.origin.y = inner_rect.y + y_margin;
+                break;
+            }
+            case Y_ALIGN_MIDDLE: {
+                const int half_h = h / 2;
+                const int half_rect_h = inner_rect.h / 2;
+                tb.origin.y = inner_rect.y + half_rect_h - half_h;
+                break;
+            }
+            case Y_ALIGN_BOTTOM: {
+                tb.origin.y = inner_rect.y + inner_rect.h - h - y_margin;
+                break;
+            }
         }
+        tb.origin.x += tb.offset.x;
+        tb.origin.y += tb.offset.y;
+        text.emplace_back(t.font->GenerateText(tb));
     }
 
-    for (const auto& p : curved_temp[1]) {
-        if (p.x >= right_side.x && p.y <= right_side.y) {
-            outline_curves_2_test.push_back(p);
-        }
-    }
-    for (const auto& p : curved_temp[3]) {
-        if (p.x >= right_side.x && p.y >= right_side.y + right_side.h) {
-            outline_curves_2_test.push_back(p);
-        }
+    for (auto& uib : builder.nodes) {
+        uib.parent = &inner_rect;
+        children.emplace_back(uib);
     }
 }
 
@@ -184,6 +219,13 @@ bool UIElement::isActive() const {
 
 void UIElement::Update() {
     // TODO
+}
+
+void UIElement::Draw(SpriteBatch *sb) const {
+    sb->Add(this);
+    for (const auto& c : children) {
+        c.Draw(sb);
+    }
 }
 
 void UIElement::setActiveState(bool state) {

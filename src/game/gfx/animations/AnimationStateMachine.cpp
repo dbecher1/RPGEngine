@@ -7,30 +7,32 @@
 
 AnimationStateMachine::AnimationStateMachine(std::string  name) : name(std::move(name)){}
 
-void AnimationStateMachine::Draw(DrawCommand *dc) const {
+void AnimationStateMachine::Draw(DrawCommand *dc) {
     dc->SpriteName = currentState.c_str();
-    animationStates.at(currentState).Draw(dc);
+    animationStates[currentState].Draw(dc);
 }
 
 void AnimationStateMachine::Update(const double dt) {
     // if (!is_playing) return;
-    animationStates.at(currentState).Update(dt);
+    animationStates[currentState].Update(dt);
 }
 
 void AnimationStateMachine::SetState(const std::string &state_) {
-    if (!is_playing)
-        is_playing = true;
     const std::string state = !name.empty() ? appendMap[state_] : state_;
-    if (state == currentState) return;
+    //if (state == currentState) return;
     if (!currentState.empty())
-        animationStates.at(currentState).Reset();
+        animationStates[currentState].Reset();
     currentState = state;
+    if (!is_playing) {
+        is_playing = true;
+        animationStates[currentState].forceFrameAdvance();
+    }
 }
 
 void AnimationStateMachine::AddAnimation(const std::string &anim_name, Animation anim) {
     std::string newName = anim_name;
     newName.append("_").append(name);
-    appendMap.emplace(anim_name, newName);
+    appendMap[anim_name] = newName;
     animationStates.emplace(newName, anim);
     if (currentState.empty())
         currentState = newName;
@@ -43,7 +45,7 @@ void AnimationStateMachine::AddAnimation(const std::string &anim_name, Animation
  */
 void AnimationStateMachine::Stop() {
     is_playing = false;
-    animationStates.at(currentState).Reset();
+    animationStates[currentState].Reset();
 }
 
 bool AnimationStateMachine::isPlaying() const {

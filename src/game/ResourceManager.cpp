@@ -105,12 +105,19 @@ bool ResourceManager::loadMaps(SDL_Renderer* renderer) {
     return true;
 }
 
+/**
+ * Loads a font (or fonts, in the future maybe) and rasterizes them, injecting them into the "images" subfolder for loading into the image/rect pipeline.
+ * @param renderer The SDL Rendering context
+ * @return True on success
+ */
 bool ResourceManager::loadFonts(SDL_Renderer *renderer) {
 
+    // Characters that I manually want to be oriented toward the top of their box as opposed to the bottom
     #define SWAP_CHARS(c) (c == '"' || c == '*')
 
     const std::string font = "PublicPixel.ttf";
 
+    // the characters to load
     const std::string characters{FONT_CHARACTERS};
 
     constexpr int x_scale = 8;
@@ -128,7 +135,8 @@ bool ResourceManager::loadFonts(SDL_Renderer *renderer) {
     for (const auto c : characters) {
         SFT_Glyph glyph;
 
-        // quotation marks are loaded weirdly for some reason, have to make a single exception
+        // This library loads certian characters (asterisks, quotes) not oriented correctly
+        // This macro (defined above) identifies them to take care of it
         if (SWAP_CHARS(c))
             sft.flags = SFT_DOWNWARD_Y;
         else
@@ -154,18 +162,16 @@ bool ResourceManager::loadFonts(SDL_Renderer *renderer) {
                 for (int i = 0; i < depth; i++) {
                     int final_idx;
 
-                    // See note above about how quotes are annoying
                     if (SWAP_CHARS(c))
                         final_idx = i + (idx * depth);
                     else
                         final_idx = i + ((((y_scale - y - 2) * x_scale) + x) * depth);
 
                     pixels_final[final_idx] = val;
-                    // alpha weirdness
-
                 }
             }
         }
+
         // Adjust for a 1 pixel buffer that this library creates
         const auto surf = SDL_CreateRGBSurfaceFrom(&pixels_final, img.width - 1, img.height - 1, 8 * depth, img.width * depth, 0xFF000000, 0xFF0000, 0xFF00, 0xFF);
         // rest of the game uses BGRA so it'll complain unless we convert
@@ -317,7 +323,6 @@ void ResourceManager::writeTexture(SDL_Texture *texture, SDL_Renderer *renderer,
     std::cout << name << " " << SDL_GetPixelFormatName(f) << std::endl;
 
     SDL_Surface* surf = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, PIXEL_FORMAT);
-    //SDL_Surface* surf = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
     SDL_RenderReadPixels(renderer, nullptr, 0, surf->pixels, surf->pitch);
 
     IMG_SavePNG(surf, name.c_str());

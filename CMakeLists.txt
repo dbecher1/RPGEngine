@@ -12,6 +12,7 @@ find_package(SDL2_IMAGE REQUIRED)
 set (SDL2_IMAGE_LIBRARIES /Library/Frameworks/SDL2_image.framework/SDL2_image)
 
 if (SDL2_FOUND)
+    message("SDL2 version: ${SDL2_VERSION}")
     message("SDL2 include directory found: ${SDL2_INCLUDE_DIR}")
     message("SDL2 library found: ${SDL2_LIBRARIES}")
 endif ()
@@ -83,6 +84,7 @@ add_executable(RPG
         src/game/ui/Font.cpp
         src/game/ui/Font.h
         src/tools/extern/schrift.c
+        src/game/ui/Text.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

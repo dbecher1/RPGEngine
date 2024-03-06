@@ -8,6 +8,8 @@
 
 // TODO: revisit camera + resizing
 
+SDL_Texture* TEST_CIRCLE;
+
 SpriteBatch::SpriteBatch(const SpriteBatchBuilder sbb)
 : resourceManager(sbb.resourceManager) {
 
@@ -34,13 +36,11 @@ SpriteBatch::SpriteBatch(const SpriteBatchBuilder sbb)
         renderTarget = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
     }
     ui_target = SDL_CreateTexture(renderer, PIXEL_FORMAT, SDL_TEXTUREACCESS_TARGET, screenWidth, screenHeight);
-    //ui_target = BackbufferTexture(renderer, PIXEL_FORMAT, screenWidth, screenHeight);
 
     camera = Camera{renderer, {windowWidth, windowHeight}, {screenWidth, screenHeight}};
     camera.Init_BackBuffer();
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(ui_target, SDL_BLENDMODE_BLEND);
-    //ui_target.setBlendMode(SDL_BLENDMODE_BLEND);
     SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
 }
 
@@ -128,11 +128,11 @@ void SpriteBatch::SubmitDraw() {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
     SDL_RenderClear(renderer);
 
-    SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_MOD);
-    const auto t = resourceManager->getRectFromTextureName("UI_gradient");
+    const auto ui_gradient = resourceManager->getRectFromTextureName("UI_gradient");
 
     for (const auto &ui : uiDrawQueue) {
 
+        SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_MOD);
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
         SDL_RenderFillRects(renderer, ui->rects.data(), static_cast<int>(ui->rects.size()));
@@ -140,7 +140,6 @@ void SpriteBatch::SubmitDraw() {
             SDL_RenderDrawLines(renderer, edge.data(), static_cast<int>(edge.size()));
         }
         // outlines
-        // SDL_SetRenderDrawColor(renderer, ui->outlineColor.r, ui->outlineColor.g, ui->outlineColor.b, ui->outlineColor.a);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 
         for (int i = 0; i < ui->outline_straight.size() - 1; i += 2) {
@@ -148,21 +147,32 @@ void SpriteBatch::SubmitDraw() {
         }
         SDL_RenderDrawPoints(renderer, ui->outline_curves.data(), static_cast<int>(ui->outline_curves.size()));
 
-        SDL_RenderCopy(renderer, atlas, &t, &ui->raw_rect);
+        SDL_RenderCopy(renderer, atlas, &ui_gradient, &ui->raw_rect);
+
+        SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
+
+        for (const auto& text_entry : ui->text) {
+            for (const auto& [src, dst] : text_entry) {
+                // Drop shadow!
+                // TODO: Profile the potential performance impact of this, if any
+                SDL_Rect shadow_dst = {dst.x + 2, dst.y + 2, dst.w, dst.h};
+                SDL_SetTextureColorMod(atlas, 0, 0, 0);
+                SDL_RenderCopy(renderer, atlas, &src, &shadow_dst);
+
+                // Render the regular white text
+                // TODO: maybe put a color field in the text entries? for special colors, yellow/red etc
+                SDL_SetTextureColorMod(atlas, 255, 255, 255);
+                SDL_RenderCopy(renderer, atlas, &src, &dst);
+            }
+        }
     }
     uiDrawQueue.clear();
 
+    SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_MOD);
     SDL_SetRenderTarget(renderer, nullptr);
     SDL_RenderCopy(renderer, ui_target, nullptr, nullptr);
     SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
 
-    // Text
-    for (const auto& text : textQueue) {
-        for (const auto& [src, dst] : text) {
-            SDL_RenderCopy(renderer, atlas, &src, &dst);
-        }
-    }
-    textQueue.clear();
 
     SDL_RenderPresent(renderer);
 }
@@ -180,12 +190,8 @@ void SpriteBatch::Add(DrawCommand drawCommand) {
     DrawCommands[drawCommand.z].emplace_back(drawCommand);
 }
 
-void SpriteBatch::Add(UIElement *ui) {
+void SpriteBatch::Add(const UIElement *ui) {
     uiDrawQueue.push_back(ui);
-}
-
-void SpriteBatch::Add(Text &t) {
-    textQueue.push_back(std:: move(t));
 }
 
 // TODO!!! Update all the resize methods with the new game state object

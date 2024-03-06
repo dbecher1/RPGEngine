@@ -6,8 +6,8 @@
 #define RPG_UIMANAGER_H
 
 #include "UIElement.h"
-#include "Font.h"
 #include <map>
+#include "Font.h"
 
 class SpriteBatch;
 class ResourceManager;
