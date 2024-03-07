@@ -9,6 +9,8 @@ BattleEntity::BattleEntity(const EntityBuilder &eb) :
 Animations(eb.battleAnimations) {}
 
 void BattleEntity::Draw(DrawCommand *dc) {
+    dc->z = 5;
+    Animations.Draw(dc);
 }
 
 void BattleEntity::FixedUpdate() {

@@ -5,8 +5,6 @@
 #include "Camera.h"
 #include "../misc/macros.h"
 
-#define ZOOM 3.0f
-
 // TODO: set a "player locked" variable for pans/cutscenes etc
 // TODO: look into making viewport an int rect
 
@@ -16,8 +14,8 @@ windowWidth(window.x), windowHeight(window.y) {
     viewPort = {
             0,
             0,
-            static_cast<float>(screen.x) / ZOOM,
-            static_cast<float>(screen.y) / ZOOM,
+            static_cast<float>(screen.x) / CAMERA_ZOOM,
+            static_cast<float>(screen.y) / CAMERA_ZOOM,
     };
 
     subRect = {

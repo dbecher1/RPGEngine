@@ -7,7 +7,14 @@
 
 #include "../misc/macros.h"
 
-
+enum CurrentState {
+    ERR = -1,
+    MENU,
+    OVERWORLD,
+    BATTLE,
+    PAUSE,
+    SHOP,
+};
 
 struct GlobalState {
     static double GameTime_Accumulator;
@@ -20,6 +27,8 @@ struct GlobalState {
     static bool GameWindow_FullScreen;
     static Uint32 GameWindow_CurrentResolution_Width;
     static Uint32 GameWindow_CurrentResolution_Height;
+
+    static CurrentState CurrentGlobalState, PreviousGlobalState;
 
     static void GameTime_Tick(double dt);
 

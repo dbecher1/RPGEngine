@@ -51,6 +51,8 @@ public:
     void windowResizeEvent(int new_width, int new_height);
 private:
     void calculateResize();
+    void drawText(const Text& txt) const;
+
     int windowWidth, windowHeight, screenWidth{}, screenHeight{};
     float aspectRatio;
     bool letterbox{};

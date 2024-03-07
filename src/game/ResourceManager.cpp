@@ -13,6 +13,8 @@
 #include <fstream>
 
 #include "battle/ElementalAffinity.h"
+#include "ui/Text.h"
+#include "ui/UIElement.h"
 
 /// TODO: probably set an upper limit on texture packing and create a way for a multi-level hierarchy of images
 
@@ -22,6 +24,8 @@
 #define ENVIRONMENT_PATH "../resources/misc/environments.json"
 #define MAP_PATH "../resources/maps/"
 #define FONT_PATH "../resources/fonts/"
+#define UI_PATH "../resources/ui/"
+#define ENEMY_PATH "../resources/enemies/"
 
 using json = nlohmann::json;
 
@@ -33,6 +37,7 @@ ResourceManager::~ResourceManager() {
 bool ResourceManager::loadAllResources(SDL_Renderer* renderer) {
     bool flag = this->loadMaps(renderer);
     flag = flag && this->loadFonts(renderer);
+    loadUIElements();
     flag = flag && this->loadTextures(renderer);
     if constexpr (DEBUG_PRINT) {
         std::cout << "\n===TEXTURE RECT INFORMATION===" << std::endl;
@@ -135,7 +140,7 @@ bool ResourceManager::loadFonts(SDL_Renderer *renderer) {
     for (const auto c : characters) {
         SFT_Glyph glyph;
 
-        // This library loads certian characters (asterisks, quotes) not oriented correctly
+        // This library loads certain characters (asterisks, quotes) not oriented correctly
         // This macro (defined above) identifies them to take care of it
         if (SWAP_CHARS(c))
             sft.flags = SFT_DOWNWARD_Y;
@@ -246,13 +251,15 @@ bool ResourceManager::loadEntities() {
             }
 
             for (auto& anim : manifest["Battle"]["Animations"]) {
-                std::string fn = anim["Name"];
-                //fn.append(dir);
-                auto [_, _a, w, h] = textureRects[fn];
-                int fx = anim["FramesX"];
-                int fy = anim["FramesY"];
-                double fs = anim["Speed"];
-                battle.AddAnimation(fn, Animation{fx, fy, fs, {static_cast<float>(w), static_cast<float>(h)}});
+                std::string anim_name = anim["Name"];
+                // The texture rect is stored with the identifier, so we need to reconstruct that
+                std::string rect_name = anim_name;
+                rect_name.append("_").append(dir);
+                auto [_, _a, w, h] = textureRects[rect_name];
+                int framesX = anim["FramesX"];
+                int framesY = anim["FramesY"];
+                double speed = anim["Speed"];
+                battle.AddAnimation(anim_name, Animation{framesX, framesY, speed, {static_cast<float>(w), static_cast<float>(h)}});
             }
 
             EntityBuilder eb{
@@ -268,6 +275,29 @@ bool ResourceManager::loadEntities() {
             std::cerr << e.what() << std::endl;
         }
 
+    }
+    return true;
+}
+
+bool ResourceManager::loadEnemies() {
+    for (const auto& entry : iter_dir(ENEMY_PATH)) {
+        if (!entry.is_regular_file()) continue;
+
+        std::ifstream istream(entry);
+        json manifest = json::parse(istream);
+        istream.close();
+
+        try {
+            Enemy enemy;
+            enemy.name = manifest["Name"];
+            // TODO everything else lol
+
+            enemies[enemy.name] = enemy;
+        } catch (json::type_error &e) {
+            std::cerr << e.what() << std::endl;
+        } catch (json::parse_error &e) {
+            std::cerr << e.what() << std::endl;
+        }
     }
     return true;
 }
@@ -303,6 +333,59 @@ bool ResourceManager::loadEnvironments() {
             std::cerr << e.what() << std::endl;
         }
         environments.emplace(eb.name, eb);
+    }
+
+    return true;
+}
+
+bool ResourceManager::loadUIElements() {
+
+    for (const auto& entry : iter_dir(UI_PATH)) {
+        if (entry.is_regular_file()) {
+            std::ifstream istream(entry);
+            json manifest = json::parse(istream);
+            istream.close();
+
+            try {
+                auto* uieb = new UIElementBuilder();
+
+                SDL_FRect rect;
+                rect.x = manifest["Location"][0];
+                rect.y = manifest["Location"][1];
+                rect.w = manifest["Location"][2];
+                rect.h = manifest["Location"][3];
+                uieb->Location = rect;
+
+                std::string name = manifest["Name"];
+                uieb->name = name;
+                float curve = manifest["Curve"];
+                uieb->curve = curve;
+
+                if (manifest.contains("Text")) {
+                    for (const auto& text : manifest["Text"]) {
+                        TextBuilder tb;
+                        tb.text_raw  = text["Text"];
+                        tb.size = text["Size"];
+                        tb.alignment_x = text["XAlignment"];
+                        tb.alignment_y = text["YAlignment"];
+
+                        if (text.contains("OriginOffset")) {
+                            // TODO
+                        }
+                        uieb->text_builders.push_back(tb);
+                    }
+                }
+                if (manifest.contains("Children")) {
+                    // TODO: make this recursive
+                }
+
+                UIElements.push_back(uieb);
+            } catch (json::type_error &e) {
+                std::cerr << e.what() << std::endl;
+            } catch (json::parse_error &e) {
+                std::cerr << e.what() << std::endl;
+            }
+        }
     }
 
     return true;
@@ -354,6 +437,10 @@ SDL_Texture *ResourceManager::getAtlas() const {
 
 GlobalEntity *ResourceManager::getEntity(const std::string &name) {
     return &Entities.at(name);
+}
+
+Enemy ResourceManager::getEnemy(const std::string &name) {
+    return enemies[name];
 }
 
 

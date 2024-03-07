@@ -1,6 +1,6 @@
 
 ## TO DO:
-
+- FIX THE BATTLE SCENE:( I broke it by using window coordinates....
 - Revisit the big picture plan for the structure of these intertwined subsystems
     - Sit down and think about how exactly I want to structure the interactions/organization between SceneManager/EntityManager/Scenes/ResourceManager. Something feels redundant.
 - Separate the player controllable character from the sprite representation itself. This will make the system conform much easier to the intended vision

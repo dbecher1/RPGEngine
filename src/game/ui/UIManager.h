@@ -23,9 +23,14 @@ public:
     void Update(double dt);
     void ToggleState(const std::string& name);
     void Draw(SpriteBatch* sb);
+
+    UIElement* getElementByName(const std::string& name);
+    Font* getDefaultFont();
 private:
     std::map<std::string, UIElement> elements;
     Font default_font;
+
+    friend class ResourceManager;
 };
 
 

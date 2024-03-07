@@ -19,6 +19,9 @@ public:
     void FixedUpdate() override;
 private:
     AnimationStateMachine Animations;
+    // The ultimate position of the entity is going to be determined by the battle scene, this will just dictate the offset from that which they're drawn
+    Vector2 positionOffset;
+    bool frontLine = true; // emulating FFVI front/backline
 };
 
 

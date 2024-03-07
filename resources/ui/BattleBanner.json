@@ -1,0 +1,13 @@
+{
+  "Location": [0.153, 0.05, 0.7, 0.1],
+  "Name": "BattleBanner",
+  "Curve": 0.02,
+  "Text": [
+    {
+      "Text": "Curaga",
+      "Size": 24,
+      "XAlignment": 2,
+      "YAlignment": 2
+    }
+  ]
+}

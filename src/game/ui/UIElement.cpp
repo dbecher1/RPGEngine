@@ -12,10 +12,10 @@
 // TODO: adjust for when curve = 0
 
 /*
- *  110, 24, 502, 48
- *  37, 355, 119, 101
- *  157, 355, 173, 101
- *  331, 355, 353, 101
+ *  110 (0.153), 24 (0.05), 502 (0.7), 48 (0.1)
+ *  37 (0.05), 355 (0.74), 119 (0.165), 101 (0.21)
+ *  157, 355, 173, 101 (0.22, 0.74, 0.24, 0.21)
+ *  331, 355, 353, 101 (0.46, 0.74, 0.49, 0.21)
  */
 
 UIElement::UIElement(UIElementBuilder& builder) :
@@ -92,57 +92,11 @@ name(builder.name), is_active(builder.is_active) {
         }
     }
 
-    for (const auto& t : builder.text_builders) {
-        TextBuilder tb = t;
-        const int w = t.calculateWidth();
-        const int h = t.calculateHeight();
-        const int x_margin = inner_rect.w * 0.015625; // 1/64 of width
-        const int y_margin = inner_rect.h * 0.0625; // 1/16 of height
-
-        switch (t.alignment_x) {
-            case X_ALIGN_NONE: {
-                tb.origin.x += inner_rect.x;
-                break;
-            }
-            case X_ALIGN_LEFT: {
-                tb.origin.x = inner_rect.x + x_margin;
-                break;
-            }
-            case X_ALIGN_CENTER: {
-                const int half_w = w / 2;
-                const int half_rect_w = inner_rect.w / 2;
-                tb.origin.x = inner_rect.x + half_rect_w - half_w;
-                break;
-            }
-            case X_ALIGN_RIGHT: {
-                tb.origin.x = inner_rect.x + inner_rect.w - w - x_margin;
-                break;
-            }
-        }
-
-        switch (t.alignment_y) {
-            case Y_ALIGN_NONE: {
-                tb.origin.y += inner_rect.y;
-                break;
-            }
-            case Y_ALIGN_TOP: {
-                tb.origin.y = inner_rect.y + y_margin;
-                break;
-            }
-            case Y_ALIGN_MIDDLE: {
-                const int half_h = h / 2;
-                const int half_rect_h = inner_rect.h / 2;
-                tb.origin.y = inner_rect.y + half_rect_h - half_h;
-                break;
-            }
-            case Y_ALIGN_BOTTOM: {
-                tb.origin.y = inner_rect.y + inner_rect.h - h - y_margin;
-                break;
-            }
-        }
-        tb.origin.x += tb.offset.x;
-        tb.origin.y += tb.offset.y;
-        text.emplace_back(t.font->GenerateText(tb));
+    for (auto& t : builder.text_builders) {
+        TextObjectType type = TEXT_TYPE_STATIC;
+        if (t.is_dynamic)
+            type = TEXT_TYPE_DYNAMIC;
+        constructText(&t, type);
     }
 
     for (auto& uib : builder.nodes) {
@@ -213,6 +167,76 @@ void UIElement::GenerateCircle(std::vector<SDL_Point> *points, int radius, SDL_P
     }
 }
 
+void UIElement::constructText(TextBuilder *tb, TextObjectType text_type) {
+    const int w = tb->calculateWidth();
+    const int h = tb->calculateHeight();
+    const int x_margin = inner_rect.w * 0.015625; // 1/64 of width
+    const int y_margin = inner_rect.h * 0.0625; // 1/16 of height
+
+    switch (tb->alignment_x) {
+        case X_ALIGN_NONE: {
+            tb->origin.x += inner_rect.x;
+            break;
+        }
+        case X_ALIGN_LEFT: {
+            tb->origin.x = inner_rect.x + x_margin;
+            break;
+        }
+        case X_ALIGN_CENTER: {
+            const int half_w = w / 2;
+            const int half_rect_w = inner_rect.w / 2;
+            tb->origin.x = inner_rect.x + half_rect_w - half_w;
+            break;
+        }
+        case X_ALIGN_RIGHT: {
+            tb->origin.x = inner_rect.x + inner_rect.w - w - x_margin;
+            break;
+        }
+    }
+
+    switch (tb->alignment_y) {
+        case Y_ALIGN_NONE: {
+            tb->origin.y += inner_rect.y;
+            break;
+        }
+        case Y_ALIGN_TOP: {
+            tb->origin.y = inner_rect.y + y_margin;
+            break;
+        }
+        case Y_ALIGN_MIDDLE: {
+            const int half_h = h / 2;
+            const int half_rect_h = inner_rect.h / 2;
+            tb->origin.y = inner_rect.y + half_rect_h - half_h;
+            break;
+        }
+        case Y_ALIGN_BOTTOM: {
+            tb->origin.y = inner_rect.y + inner_rect.h - h - y_margin;
+            break;
+        }
+    }
+    tb->origin.x += tb->offset.x;
+    tb->origin.y += tb->offset.y;
+    switch (text_type) {
+        case TEXT_TYPE_STATIC: {
+            staticText.emplace_back(tb->font->GenerateText(*tb));
+            break;
+        }
+        case TEXT_TYPE_DYNAMIC: {
+            DynamicText dt {
+                tb->font->GenerateText(*tb),
+                tb->font,
+                tb->size,
+                tb->alignment_x,
+                tb->alignment_y,
+                tb->origin,
+                tb->offset
+            };
+            dynamicText.emplace(tb->dyn_id, dt);
+            break;
+        }
+    }
+}
+
 bool UIElement::isActive() const {
     return is_active;
 }
@@ -221,7 +245,7 @@ void UIElement::Update() {
     // TODO
 }
 
-void UIElement::Draw(SpriteBatch *sb) const {
+void UIElement::Draw(SpriteBatch *sb) const { // NOLINT(*-no-recursion)
     sb->Add(this);
     for (const auto& c : children) {
         c.Draw(sb);
@@ -230,4 +254,28 @@ void UIElement::Draw(SpriteBatch *sb) const {
 
 void UIElement::setActiveState(bool state) {
     is_active = state;
+}
+
+void UIElement::addText(TextBuilder &tb) {
+    TextObjectType type = TEXT_TYPE_STATIC;
+    if (tb.is_dynamic)
+        type = TEXT_TYPE_DYNAMIC;
+    constructText(&tb, type);
+}
+
+void UIElement::clearAllText() {
+    staticText.clear();
+    dynamicText.clear();
+}
+
+void UIElement::updateText(const std::string& id, const std::string &txt) {
+    if (dynamicText.count(id) == 0) return;
+    TextBuilder tb{dynamicText[id].font, txt};
+    tb.size = dynamicText[id].size;
+    tb.alignment_x = dynamicText[id].alignment_x;
+    tb.alignment_y = dynamicText[id].alignment_y;
+    tb.origin = dynamicText[id].origin;
+    tb.offset = dynamicText[id].offset;
+    dynamicText[id].data = dynamicText[id].font->GenerateText(tb);
+    //dynamicText[id].data = dynamicText[id].font->GenerateText()
 }

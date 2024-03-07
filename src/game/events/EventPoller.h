@@ -12,6 +12,7 @@ class EventPoller {
 public:
     EventPoller() = default;
     bool Poll(RPG::Event* e);
+    void Push(RPG::Event e);
 private:
     std::deque<RPG::Event> EventQueue;
 };

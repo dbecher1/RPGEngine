@@ -78,7 +78,7 @@ void SpriteBatch::SubmitDraw() {
             SDL_Rect source_rect;
             source_rect = resourceManager->getRectFromTextureName(drawable.SpriteName);
 
-            SDL_FRect dest, *dest_ptr = nullptr;
+            SDL_FRect dest{}, *dest_ptr = nullptr;
 
             if (!drawable.staticSprite && !drawable.overrideSrcRect) {
                 dest.x = drawable.position.x;
@@ -108,7 +108,20 @@ void SpriteBatch::SubmitDraw() {
                 source_rect.h = src.h;
                 dest_ptr = &drawable.tileOverride->dest;
             }
-
+            // For battle scene things, where things are drawn to screen coordinates and not world
+            if (drawable.battle_scale) {
+                auto vp = camera.getViewport();
+                if (drawable.staticSprite) {
+                    // The background, maybe animations
+                    dest_ptr = &vp;
+                }
+                else if (dest_ptr) {
+                    // Characters/Monsters
+                    // Coordinates are sent as screen coordinates, floats from 0.0-1.0, need to transform to camera viewport coords
+                    dest.x *= vp.w;
+                    dest.y *= vp.h;
+                }
+            }
             SDL_RenderCopyExF(renderer, atlas, &source_rect, dest_ptr, 0, nullptr, SDL_FLIP_NONE);
         }
         DrawCommands[i].clear();
@@ -151,19 +164,11 @@ void SpriteBatch::SubmitDraw() {
 
         SDL_SetTextureBlendMode(atlas, SDL_BLENDMODE_BLEND);
 
-        for (const auto& text_entry : ui->text) {
-            for (const auto& [src, dst] : text_entry) {
-                // Drop shadow!
-                // TODO: Profile the potential performance impact of this, if any
-                SDL_Rect shadow_dst = {dst.x + 2, dst.y + 2, dst.w, dst.h};
-                SDL_SetTextureColorMod(atlas, 0, 0, 0);
-                SDL_RenderCopy(renderer, atlas, &src, &shadow_dst);
-
-                // Render the regular white text
-                // TODO: maybe put a color field in the text entries? for special colors, yellow/red etc
-                SDL_SetTextureColorMod(atlas, 255, 255, 255);
-                SDL_RenderCopy(renderer, atlas, &src, &dst);
-            }
+        for (const auto& text_entry : ui->staticText) {
+            drawText(text_entry);
+        }
+        for (const auto& [_, text_entry] : ui->dynamicText) {
+            drawText(text_entry.data);
         }
     }
     uiDrawQueue.clear();
@@ -202,8 +207,8 @@ void SpriteBatch::Add(const UIElement *ui) {
  * @param new_height The new window height
  */
 void SpriteBatch::windowResizeEvent(const int new_width, const int new_height) {
-    windowWidth = new_width;
-    windowHeight = new_height;
+    //windowWidth = new_width;
+    //windowHeight = new_height;
     calculateResize();
 }
 
@@ -221,14 +226,29 @@ void SpriteBatch::calculateResize() {
         // If the aspect ratio is under the goal, shrink the height
         // If over the goal, shrink the width
         letterbox = true;
-        screenHeight = windowHeight;
-        screenWidth = static_cast<int>(static_cast<float>(windowHeight) * aspectRatio);
+        //screenHeight = windowHeight;
+        //screenWidth = static_cast<int>(static_cast<float>(windowHeight) * aspectRatio);
         letter_offset = (windowWidth - screenWidth) / 2;
         const float new_aspect = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
         std::cout << "Aspect ratio: " << new_aspect << std::endl;
     }
     std::cout << "Screen width: " << screenWidth << std::endl;
     std::cout << "Screen height: " << screenHeight << std::endl;
+}
+
+void SpriteBatch::drawText(const Text &txt) const {
+    for (const auto& [src, dst] : txt) {
+        // Drop shadow!
+        // TODO: Profile the potential performance impact of this, if any
+        SDL_Rect shadow_dst = {dst.x + 2, dst.y + 2, dst.w, dst.h};
+        SDL_SetTextureColorMod(atlas, 0, 0, 0);
+        SDL_RenderCopy(renderer, atlas, &src, &shadow_dst);
+
+        // Render the regular white staticText
+        // TODO: maybe put a color field in the staticText entries? for special colors, yellow/red etc
+        SDL_SetTextureColorMod(atlas, 255, 255, 255);
+        SDL_RenderCopy(renderer, atlas, &src, &dst);
+    }
 }
 
 // This may be removed if I don't find a good purpose for it; helpful for debugging

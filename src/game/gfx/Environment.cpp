@@ -16,4 +16,5 @@ void Environment::Draw(DrawCommand *dc) const {
     dc->SpriteName = useSpriteName ? spriteName.c_str() : name.c_str();
     dc->z = z;
     dc->staticSprite = true;
+    dc->battle_scale = true;
 }

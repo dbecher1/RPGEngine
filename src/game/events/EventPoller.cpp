@@ -15,3 +15,7 @@ bool EventPoller::Poll(RPG::Event *e) {
     EventQueue.pop_front();
     return true;
 }
+
+void EventPoller::Push(RPG::Event e) {
+    EventQueue.push_back(e);
+}

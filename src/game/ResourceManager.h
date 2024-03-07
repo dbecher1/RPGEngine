@@ -15,9 +15,14 @@
 #include <vector>
 #include <unordered_map>
 
+#include "battle/Enemy.h"
+
 class ImagePacker;
 class SpriteBatch;
 class Maps;
+class UIManager;
+
+struct UIElementBuilder;
 
 class ResourceManager {
 public:
@@ -39,6 +44,7 @@ public:
     Environment* getEnvironment(const std::string& name);
     Maps* getMap(const std::string& name);
     GlobalEntity* getEntity(const std::string& name);
+    Enemy getEnemy(const std::string& name);
 
     //static const std::string FONT_CHARACTERS;
 
@@ -49,7 +55,9 @@ private:
     bool loadFonts(SDL_Renderer *renderer);
     bool loadAnimations();
     bool loadEntities();
+    bool loadEnemies();
     bool loadEnvironments();
+    bool loadUIElements();
 
     // Static helpers for textures and file management
     static void writeTexture(SDL_Texture* texture, SDL_Renderer* renderer, const std::string& name);
@@ -59,12 +67,15 @@ private:
     std::unordered_map<std::string, Environment> environments;
     std::unordered_map<std::string, Maps> maps;
     std::unordered_map<std::string, GlobalEntity> Entities;
+    std::unordered_map<std::string, Enemy> enemies;
     SDL_Texture* atlas;
 
+    std::vector<UIElementBuilder*> UIElements;
     std::vector<std::string> TEMP_fileNames; // used to make sure we don't double load tilemap textures
 
     friend class ImagePacker;
     friend class SpriteBatch;
+    friend class UIManager;
 };
 
 

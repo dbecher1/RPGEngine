@@ -85,6 +85,9 @@ add_executable(RPG
         src/game/ui/Font.h
         src/tools/extern/schrift.c
         src/game/ui/Text.h
+        src/game/scenes/BattleScene.cpp
+        src/game/scenes/BattleScene.h
+        src/game/battle/Enemy.h
 )
 
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})

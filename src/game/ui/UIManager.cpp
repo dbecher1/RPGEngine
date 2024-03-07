@@ -9,6 +9,24 @@ UIManager::UIManager(const ResourceManager* resourceManager) {
 
     default_font = Font(resourceManager);
 
+    for (auto& eb : resourceManager->UIElements) {
+
+        eb->is_active = true;
+
+        for (auto& t : eb->text_builders) {
+            if (t.font == nullptr) {
+                t.font = &default_font;
+            }
+        }
+
+        // TODO: children elements
+        elements.emplace(eb->name, *eb);
+
+        delete eb;
+    }
+
+    /*
+
     SDL_FRect r{0.0125f, 0.0125f, 0.25f, 0.5f};
     UIElementBuilder eb = {r, "pause"};
     eb.is_active = true;
@@ -36,6 +54,7 @@ UIManager::UIManager(const ResourceManager* resourceManager) {
     titleBox.text_builders.push_back(tb2);
     eb2.nodes.push_back(titleBox);
     elements.emplace(eb2.name, eb2);
+    */
 
 }
 
@@ -50,6 +69,14 @@ void UIManager::Draw(SpriteBatch* sb) {
             snd.Draw(sb);
         }
     }
+}
+
+UIElement * UIManager::getElementByName(const std::string &name) {
+    return &elements[name];
+}
+
+Font * UIManager::getDefaultFont() {
+    return &default_font;
 }
 
 /**

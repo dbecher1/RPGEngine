@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UI",
+  "description": "Data describing a blueprint of a UI node",
+  "type": "object",
+  "properties": {
+    "Location": {
+      "description": "The location and size of the node in screen coordinates (resolution), expressed as a floating point number 0-1",
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": false
+    },
+    "Name": {
+      "description": "The name of the node, used to call it in the code.",
+      "type": "string"
+    },
+    "Curve": {
+      "description": "Percentage of the resolution width that becomes the UI node curved edge radius.",
+      "type": "number",
+      "inclusiveMinimum": 0.0,
+      "inclusiveMaximum": 0.5
+    },
+    "Text": {
+      "description": "The text nodes to draw on the interface.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Text": {
+            "description": "The content of the text",
+            "type": "string"
+          },
+          "Size": {
+            "description": "The size of the text, in pixels for height.",
+            "type": "integer"
+          },
+          "XAlignment": {
+            "description": "The alignment of the text along the X axis as an enum, where 0 = NONE, 1 = LEFT, 2 = CENTER, 3 = RIGHT",
+            "type": "integer",
+            "inclusiveMinimum": 0,
+            "inclusiveMaximum": 3
+          },
+          "YAlignment": {
+            "description": "The alignment of the text along the Y axis as an enum, where 0 = NONE, 1 = TOP, 2 = MIDDLE, 3 = BOTTOM",
+            "type": "integer",
+            "inclusiveMinimum": 0,
+            "inclusiveMaximum": 3
+          },
+          "OriginOffset": {
+            "description": "The origin or offset of the text. Origin used if no alignment, which is expressed in pixels deviated from the location of the parent UI object. Offset used with alignment, and represents a manual adjustment of the location after alignment.",
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": ["Text", "Size", "XAlignment", "YAlignment"]
+      }
+    },
+    "Children": {
+      "description": "Children UI nodes, given recursively.",
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": ["Location", "Name", "Curve"]
+}

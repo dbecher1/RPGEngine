@@ -17,6 +17,7 @@
 #define INITIAL_WIDTH 720
 #define INITIAL_HEIGHT 480
 #define ASPECT_RATIO 1.5
+#define CAMERA_ZOOM 3.0f
 
 // Flags
 

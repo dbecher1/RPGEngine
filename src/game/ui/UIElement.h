@@ -9,6 +9,7 @@
 #include "Text.h"
 #include <vector>
 #include <array>
+#include <map>
 #include <string>
 
 class SpriteBatch;
@@ -27,26 +28,36 @@ struct UIElementBuilder {
 
 class UIElement {
 public:
-    UIElement() = delete;
+    UIElement() = default;
     explicit UIElement(UIElementBuilder& builder);
     void Update();
     void Draw(SpriteBatch* sb) const;
     [[nodiscard]] bool isActive() const;
     void setActiveState(bool state);
+
+    void addText(TextBuilder& tb);
+    void updateText(const std::string& id, const std::string &txt);
+    void clearAllText(); // Useful for things like battle UI, "blueprint" type UI that's reused
 private:
+    static SDL_Rect convertRectToScreen(SDL_FRect r);
+    static void GenerateCircle(std::vector<SDL_Point> *points, int radius, SDL_Point origin, int corner);
+
+    void constructText(TextBuilder* tb, TextObjectType text_type);
+
+    Font* font = nullptr;
     std::string name;
     std::vector<UIElement> children;
-    std::vector<Text> text;
+    std::vector<Text> staticText;
+    std::map<std::string, DynamicText> dynamicText;
     SDL_Rect raw_rect{};
     SDL_Rect inner_rect{};
     std::vector<SDL_Rect> rects;
     std::array<std::vector<SDL_Point>, 4> curved_edges;
     std::vector<SDL_Point> outline_straight;
     std::vector<SDL_Point> outline_curves;
-    bool is_active;
+    bool is_active = true;
 
-    static SDL_Rect convertRectToScreen(SDL_FRect r);
-    static void GenerateCircle(std::vector<SDL_Point> *points, int radius, SDL_Point origin, int corner);
+
 
     friend class SpriteBatch;
 };

@@ -15,6 +15,9 @@ bool GlobalState::GameWindow_FullScreen = false;
 Uint32 GlobalState::GameWindow_CurrentResolution_Width = INITIAL_WIDTH;
 Uint32 GlobalState::GameWindow_CurrentResolution_Height = INITIAL_HEIGHT;
 
+CurrentState GlobalState::CurrentGlobalState = ERR;
+CurrentState GlobalState::PreviousGlobalState = ERR;
+
 void GlobalState::GameTime_Tick(double dt) {
     GameTime_Accumulator += dt;
     if (GameTime_Accumulator >= 1) {

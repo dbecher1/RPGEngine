@@ -10,6 +10,7 @@
 
 // TODO: expand upon descriptions for everything
 // TODO: add in an origin offset
+// TODO: see if I can consolidate bools into enums
 
 struct DrawCommand {
     const char* SpriteName{};
@@ -22,6 +23,7 @@ struct DrawCommand {
     bool staticSprite = false;
     bool overrideSrcRect = false;
     Tile* tileOverride{};
+    bool battle_scale = false; // this is janky but doing a quick and dirty fix right now
 };
 
 
